@@ -3,6 +3,12 @@
 Last updated: 2026-03-15
 Sprint window: 2026-02-25 to 2026-03-15
 
+Detailed step-by-step task guides now live in:
+
+- [ANNIE.md](/Users/arieltyson/Desktop/SFU/Research/CMPT%20416/Repo/axiom-mobile/docs/tasks/ANNIE.md)
+- [MAHIM.md](/Users/arieltyson/Desktop/SFU/Research/CMPT%20416/Repo/axiom-mobile/docs/tasks/MAHIM.md)
+- [ARIEL.md](/Users/arieltyson/Desktop/SFU/Research/CMPT%20416/Repo/axiom-mobile/docs/tasks/ARIEL.md)
+
 ## Sprint Goal
 
 Complete the next practical milestones after the current toy dataset:
