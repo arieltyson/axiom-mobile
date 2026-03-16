@@ -1,0 +1,19 @@
+{
+  "backend": "heuristic",
+  "coreml_ready": false,
+  "description": "Executable zero-dependency baseline that memorizes the most common answer per normalized question and falls back to the global majority answer.",
+  "display_name": "Question Lookup Baseline v0",
+  "executable": true,
+  "expected_app_footprint_mb": 0.1,
+  "family": "baseline",
+  "model_id": "question_lookup_v0",
+  "notes": "Use this only for offline pipeline validation and early metric plumbing.",
+  "priority_rank": 1,
+  "source": "local",
+  "stage": "baseline",
+  "supported_capabilities": [
+    "offline-evaluation",
+    "result-schema-validation",
+    "pipeline-smoke-test"
+  ]
+}

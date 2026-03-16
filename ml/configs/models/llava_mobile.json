@@ -1,0 +1,18 @@
+{
+  "backend": "transformers",
+  "coreml_ready": false,
+  "description": "Planned mobile-oriented VLM candidate for the AXIOM-Mobile baseline shortlist.",
+  "display_name": "LLaVA Mobile",
+  "executable": false,
+  "family": "vlm",
+  "model_id": "llava_mobile",
+  "notes": "Config-only placeholder until the team locks the exact checkpoint and dependency path.",
+  "priority_rank": 3,
+  "source": "candidate-shortlist",
+  "stage": "candidate",
+  "supported_capabilities": [
+    "vision-language",
+    "mobile-oriented",
+    "planned-coreml-export"
+  ]
+}

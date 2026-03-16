@@ -1,0 +1,18 @@
+{
+  "backend": "transformers",
+  "coreml_ready": false,
+  "description": "Planned VLM candidate for baseline comparison and later Core ML feasibility work.",
+  "display_name": "Florence-2 Base",
+  "executable": false,
+  "family": "vlm",
+  "model_id": "florence_2_base",
+  "notes": "Keep as a structured candidate config until dependency selection and exact checkpoint verification are finalized.",
+  "priority_rank": 2,
+  "source": "candidate-shortlist",
+  "stage": "candidate",
+  "supported_capabilities": [
+    "vision-language",
+    "instruction-following",
+    "planned-coreml-export"
+  ]
+}

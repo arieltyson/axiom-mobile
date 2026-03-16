@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -70,3 +71,24 @@ def load_all_splits(
         validate_split_overlaps(splits)
     return splits
 
+
+def split_manifest_paths(repo_root: str | Path | None = None) -> dict[str, Path]:
+    return {split: _manifest_path(split, repo_root=repo_root) for split in SPLITS}
+
+
+def dataset_fingerprint(repo_root: str | Path | None = None) -> dict[str, Any]:
+    split_hashes: dict[str, str] = {}
+    combined = hashlib.sha256()
+
+    for split, path in split_manifest_paths(repo_root=repo_root).items():
+        payload = path.read_bytes()
+        split_hashes[split] = hashlib.sha256(payload).hexdigest()
+        combined.update(split.encode("utf-8"))
+        combined.update(b"\0")
+        combined.update(payload)
+        combined.update(b"\0")
+
+    return {
+        "combined_sha256": combined.hexdigest(),
+        "split_sha256": split_hashes,
+    }
