@@ -61,13 +61,14 @@ Deliverable status: `[~]` In progress.
 
 ## Phase 2 (Weeks 5-6): Model Selection and Baseline
 
-- `[ ]` Model harness (`train()`, `predict()`, `export_coreml()`) not present.
-- `[ ]` Candidate model configs (Florence/LLaVA/Qwen-VL) not present.
-- `[ ]` Baseline training artifacts/metrics not present.
+- `[x]` Initial model harness exists under `ml/src/axiom/models/` with a shared interface for `train()`, `predict()`, and `export_coreml()`.
+- `[x]` Candidate model configs exist under `ml/configs/models/` for Florence, LLaVA Mobile, Qwen-VL INT4, and the executable local baseline.
+- `[x]` Baseline experiment runner exists (`ml/scripts/run_baseline.py`) and writes reproducible metrics/artifacts to `results/baselines/`.
+- `[x]` Model selection rubric is documented in `docs/MODEL_SELECTION.md`.
 - `[ ]` SwiftUI testbed shell not present in repo.
 - `[ ]` Core ML baseline conversion pipeline not present.
 
-Deliverable status: `[ ]` Not started in current codebase.
+Deliverable status: `[~]` In progress.
 
 ## Phase 3 (Weeks 7-10): Selection Strategies and Training Pipeline
 
@@ -110,3 +111,4 @@ Deliverable status: `[ ]` Not started in current codebase.
 - `[x]` Add a reusable Python dataset module under `ml/src/axiom/data/` (loader + validation + split stats).
 - `[x]` Freeze a balanced reviewed split for the first dataset checkpoint (`37/5/10` over 52 examples).
 - `[x]` Add baseline CI workflows for Python checks and dataset QC.
+- `[x]` Add Phase 2 scaffold for model selection, baseline execution, and result artifact writing.

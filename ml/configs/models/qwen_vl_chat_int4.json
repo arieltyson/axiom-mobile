@@ -1,0 +1,19 @@
+{
+  "backend": "transformers",
+  "coreml_ready": false,
+  "description": "Planned quantized VLM candidate for shortlist comparison under tight model-size constraints.",
+  "display_name": "Qwen-VL Chat INT4",
+  "executable": false,
+  "family": "vlm",
+  "model_id": "qwen_vl_chat_int4",
+  "notes": "Config-only placeholder until exact package compatibility and conversion feasibility are verified.",
+  "priority_rank": 4,
+  "quantization": "int4",
+  "source": "candidate-shortlist",
+  "stage": "candidate",
+  "supported_capabilities": [
+    "vision-language",
+    "quantized",
+    "planned-coreml-export"
+  ]
+}

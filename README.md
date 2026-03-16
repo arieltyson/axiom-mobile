@@ -143,6 +143,25 @@ data/
 
 ## 🤖 **2) Train Models at Label Budget k**
 
+Current repository status:
+
+- The full training/sweep pipeline is still planned.
+- The executable Phase 2 scaffold currently uses a lightweight offline baseline so the team can validate model-selection plumbing, metrics, and result artifacts end to end.
+
+Run the current baseline scaffold:
+
+```bash
+python3 ml/scripts/run_baseline.py
+```
+
+This writes:
+
+- `results/baselines/question_lookup_v0_seed0/run_result.json`
+- per-split prediction files
+- baseline training metadata
+
+Planned future training commands (not implemented yet) are shown below for the later experiment grid.
+
 Train one strategy at one budget (example):
 
 ```bash

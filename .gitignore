@@ -8,6 +8,8 @@ build/
 
 # Results
 results/runs/
+results/baselines/
+!results/README.md
 artifacts/
 *.csv
 
