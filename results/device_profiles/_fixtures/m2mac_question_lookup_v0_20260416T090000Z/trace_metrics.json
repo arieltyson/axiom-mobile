@@ -1,0 +1,8 @@
+{
+  "peak_memory_mb": 45.2,
+  "cpu_energy_level": 2,
+  "gpu_energy_level": 0,
+  "cpu_time_user_s": 1.8,
+  "cpu_time_system_s": 0.4,
+  "notes": "Placeholder inference — minimal resource usage as expected."
+}

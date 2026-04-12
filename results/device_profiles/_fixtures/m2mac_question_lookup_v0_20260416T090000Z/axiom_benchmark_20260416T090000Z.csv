@@ -1,0 +1,12 @@
+timestamp,model_id,image_loaded,question_length,latency_ms,is_placeholder,run_kind,iteration_index
+2026-04-16T09:00:01Z,question_lookup_v0,true,38,142,true,single,0
+2026-04-16T09:00:02Z,question_lookup_v0,true,38,145,true,benchmark,0
+2026-04-16T09:00:02Z,question_lookup_v0,true,38,143,true,benchmark,1
+2026-04-16T09:00:03Z,question_lookup_v0,true,38,148,true,benchmark,2
+2026-04-16T09:00:03Z,question_lookup_v0,true,38,141,true,benchmark,3
+2026-04-16T09:00:04Z,question_lookup_v0,true,38,147,true,benchmark,4
+2026-04-16T09:00:04Z,question_lookup_v0,true,38,144,true,benchmark,5
+2026-04-16T09:00:05Z,question_lookup_v0,true,38,146,true,benchmark,6
+2026-04-16T09:00:05Z,question_lookup_v0,true,38,143,true,benchmark,7
+2026-04-16T09:00:06Z,question_lookup_v0,true,38,149,true,benchmark,8
+2026-04-16T09:00:06Z,question_lookup_v0,true,38,144,true,benchmark,9

@@ -1,0 +1,14 @@
+{
+  "app_build": "1",
+  "app_version": "1.0",
+  "benchmark_iterations": 10,
+  "device_model": "Mac",
+  "device_name": "M2 MacBook Air",
+  "export_timestamp": "2026-04-16T09:00:06Z",
+  "is_placeholder": true,
+  "model_id": "question_lookup_v0",
+  "record_count": 11,
+  "session_id": "fixture-with-trace-002",
+  "system_name": "macOS",
+  "system_version": "15.4"
+}

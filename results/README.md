@@ -21,3 +21,25 @@ Expected files per run:
 - `predictions_test.jsonl`
 
 `run_result.json` is the canonical summary artifact for later analysis.
+
+## Selection Sweeps
+
+Phase 3 sweep results are written to:
+
+- `results/selection_sweeps/sweep_v0/`
+
+See `docs/SELECTION_STRATEGIES.md` and `docs/LEARNING_CURVES.md` for details.
+
+## Device Profiles
+
+Phase 5 on-device profiling sessions are stored under:
+
+- `results/device_profiles/{device}_{model_id}_{timestamp}/`
+
+Each session directory contains the app-exported CSV + `_meta.json`, plus optional `trace_metrics.json` (manually extracted Instruments data) and raw `.trace` files.
+
+The summary pipeline (`ml/scripts/summarize_device_profiles.py`) ingests sessions and writes analysis artifacts to `results/device_profiles/analysis/`.
+
+Synthetic test fixtures live in `results/device_profiles/_fixtures/` and are not production data.
+
+See `docs/DEVICE_PROFILES.md` for the full session contract, schema, and threshold evaluation documentation.

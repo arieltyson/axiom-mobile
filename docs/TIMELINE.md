@@ -95,11 +95,11 @@ Deliverable status: `[ ]` Not started in current codebase.
 ## Phase 5 (Weeks 13-14): On-Device Evaluation
 
 - `[x]` Benchmark mode in app implemented with configurable iterations, progress tracking, and session summary.
-- `[ ]` Instruments profiling runbook not present.
+- `[x]` Instruments profiling runbook: `docs/INSTRUMENTS_RUNBOOK.md` with reproducible protocol, pre-run checklist, output contract, and companion `_meta.json` session metadata export.
 - `[x]` CSV logging with deterministic schema and share/export implemented; captures placeholder results now, ready for real Core ML metrics.
-- `[ ]` Final quality + performance metric computation pipeline not present.
+- `[x]` Device-profile ingestion and metric-summary pipeline: `ml/scripts/summarize_device_profiles.py` with typed schemas (`ml/src/axiom/results/device_profiles.py`), session folder contract, optional Instruments trace metrics sidecar, honest threshold evaluation, and analysis artifact outputs. Documented in `docs/DEVICE_PROFILES.md`.
 
-Deliverable status: `[~]` In progress (benchmark instrumentation complete; Instruments runbook and final metrics pipeline remain).
+Deliverable status: `[~]` In progress (all Phase 5 instrumentation and analysis infrastructure complete; limited by placeholder inference and missing real Core ML model — no publishable device-performance conclusions yet).
 
 ## Phase 6 (Weeks 15-16): Analysis and Publication
 
