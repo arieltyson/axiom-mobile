@@ -13,6 +13,9 @@ results/baselines/
 artifacts/
 *.csv
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Xcode user-specific state (per-user editor layout, scheme order, etc.)
 xcuserdata/
 *.xcuserstate
