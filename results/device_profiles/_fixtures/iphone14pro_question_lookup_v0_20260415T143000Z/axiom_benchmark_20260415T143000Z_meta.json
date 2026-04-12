@@ -1,0 +1,14 @@
+{
+  "app_build": "1",
+  "app_version": "1.0",
+  "benchmark_iterations": 20,
+  "device_model": "iPhone",
+  "device_name": "iPhone",
+  "export_timestamp": "2026-04-15T14:30:10Z",
+  "is_placeholder": true,
+  "model_id": "question_lookup_v0",
+  "record_count": 20,
+  "session_id": "fixture-benchmark-only-001",
+  "system_name": "iOS",
+  "system_version": "26.0"
+}

@@ -175,9 +175,29 @@ The app's exported CSV and metadata JSON share a timestamp with the Instruments 
 3. The CSV `timestamp` column shows per-inference wall-clock times.
 4. Align Instruments timeline regions with CSV iteration timestamps to correlate CPU/memory spikes with specific inference calls.
 
+### Extracting trace metrics for the summary pipeline
+
+After running each Instruments template, create a `trace_metrics.json` sidecar in the session folder with the key metrics. The Python pipeline (`ml/scripts/summarize_device_profiles.py`) merges this file into per-session summaries. See `docs/DEVICE_PROFILES.md` for the full schema.
+
+Example after running Allocations + Energy Log:
+
+```json
+{
+  "peak_memory_mb": 45.2,
+  "cpu_energy_level": 2,
+  "gpu_energy_level": 0,
+  "cpu_time_user_s": 1.8,
+  "cpu_time_system_s": 0.4,
+  "notes": "Placeholder inference — minimal resource usage."
+}
+```
+
+The Python pipeline **never** parses `.trace` binaries directly. This structured sidecar is the supported path for getting Instruments data into the analysis pipeline.
+
 ### What to save after each Instruments session
 
-- [ ] The `.trace` file (Instruments save)
+- [ ] The `.trace` file (Instruments save) — stored for reference, not parsed by Python
+- [ ] A `trace_metrics.json` with key metrics extracted from the trace (see above)
 - [ ] A screenshot of the Instruments summary view
 - [ ] The CSV + `_meta.json` from the app (via Share/AirDrop)
 
@@ -221,9 +241,24 @@ results/
 ├── baselines/                  # Phase 2 baseline results
 ├── selection_sweeps/           # Phase 3 sweep results
 └── device_profiles/            # Phase 5 profiling sessions
-    ├── README.md               # This output contract summary
+    ├── _fixtures/              # Synthetic test sessions (not production data)
+    ├── analysis/               # Generated summaries (from summarize_device_profiles.py)
+    │   ├── session_*.json      # Per-session summary
+    │   ├── summary.json        # Aggregate summary
+    │   ├── summary.csv         # Flat aggregate CSV
+    │   └── summary.md          # Human-readable report
     └── {session_folders}/      # One per (device, model, timestamp)
 ```
+
+### Running the summary pipeline
+
+After collecting sessions, run:
+
+```bash
+python3 ml/scripts/summarize_device_profiles.py
+```
+
+This validates session folders, computes latency stats and threshold evaluations, merges optional `trace_metrics.json` sidecars, and writes analysis artifacts. See `docs/DEVICE_PROFILES.md` for full documentation.
 
 ## 7. Known Limitations
 

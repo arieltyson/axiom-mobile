@@ -13,6 +13,14 @@ results/baselines/
 artifacts/
 *.csv
 
+# Device profiles: ignore raw traces but keep analysis outputs and fixtures
+results/device_profiles/**/
+!results/device_profiles/_fixtures/
+!results/device_profiles/_fixtures/**
+!results/device_profiles/analysis/
+!results/device_profiles/analysis/**
+*.trace
+
 # Claude Code local settings
 .claude/settings.local.json
 

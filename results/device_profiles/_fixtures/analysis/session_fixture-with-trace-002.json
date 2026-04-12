@@ -1,0 +1,77 @@
+{
+  "app_build": "1",
+  "app_version": "1.0",
+  "benchmark_records": 10,
+  "device_model": "Mac",
+  "device_name": "M2 MacBook Air",
+  "export_timestamp": "2026-04-16T09:00:06Z",
+  "has_trace_metrics": true,
+  "is_placeholder": true,
+  "latency": {
+    "count": 11,
+    "max_ms": 149,
+    "mean_ms": 144.7,
+    "min_ms": 141,
+    "p50_ms": 144.0,
+    "p95_ms": 148.5
+  },
+  "model_id": "question_lookup_v0",
+  "session_dir": "m2mac_question_lookup_v0_20260416T090000Z",
+  "session_id": "fixture-with-trace-002",
+  "single_records": 1,
+  "system_version": "15.4",
+  "thresholds": [
+    {
+      "measured_value": "144.0 ms",
+      "metric_name": "latency_p50",
+      "reason": "Latency is simulated (PlaceholderInferenceService). Not valid for device-performance conclusions.",
+      "status": "placeholder",
+      "threshold": "<= 400 ms"
+    },
+    {
+      "measured_value": "148.5 ms",
+      "metric_name": "latency_p95",
+      "reason": "Latency is simulated (PlaceholderInferenceService). Not valid for device-performance conclusions.",
+      "status": "placeholder",
+      "threshold": "<= 600 ms"
+    },
+    {
+      "measured_value": "45.2 MB",
+      "metric_name": "peak_memory",
+      "reason": "Peak memory within budget.",
+      "status": "pass",
+      "threshold": "< 500 MB"
+    },
+    {
+      "measured_value": "CPU energy level: 2/20",
+      "metric_name": "energy",
+      "reason": "Instruments Energy Log reports relative levels (0-20 scale), not battery %/hr directly. Manual interpretation required. Energy level is recorded for reference.",
+      "status": "unavailable",
+      "threshold": "< 5.0% battery/hr"
+    },
+    {
+      "measured_value": null,
+      "metric_name": "exact_match",
+      "reason": "Quality metrics (EM, BLEU, hallucination rate) are not captured in device benchmark sessions. These require offline evaluation against ground-truth labels from data/manifests/.",
+      "status": "unavailable",
+      "threshold": ">= 70% EM"
+    },
+    {
+      "measured_value": null,
+      "metric_name": "model_size",
+      "reason": "Model size is not captured in device benchmark sessions. Requires measuring .mlpackage size after Core ML conversion (Phase 4).",
+      "status": "unavailable",
+      "threshold": "< 100 MB"
+    }
+  ],
+  "total_records": 11,
+  "trace_metrics": {
+    "cpu_energy_level": 2,
+    "cpu_time_system_s": 0.4,
+    "cpu_time_user_s": 1.8,
+    "gpu_energy_level": 0,
+    "notes": "Placeholder inference \u2014 minimal resource usage as expected.",
+    "peak_memory_mb": 45.2
+  },
+  "warnings": []
+}
