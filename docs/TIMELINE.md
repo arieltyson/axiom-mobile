@@ -1,6 +1,6 @@
 # AXIOM-Mobile Timeline and Progress Tracker
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 This file tracks the 16-week project plan and marks what is complete based on the current repository state.
 
@@ -77,7 +77,7 @@ Deliverable status: `[~]` In progress (core ML pipeline items remain).
 - `[x]` Sweep runner (`ml/scripts/run_selection_sweep.py`) executes 3 strategies x 6 budgets x 3 seeds over the current baseline; KG-guided is honestly blocked pending KG v1.
 - `[x]` Per-run JSON results + aggregate `summary.json` + `summary.csv` written to `results/selection_sweeps/`.
 - `[x]` Selection strategies documented in `docs/SELECTION_STRATEGIES.md` with proxy rationale and limitations.
-- `[ ]` Learning curve generation scripts/plots not present.
+- `[x]` Learning curve generation script (`ml/scripts/generate_learning_curves.py`) produces aggregated JSON, CSV, and deterministic SVG plots; documented in `docs/LEARNING_CURVES.md`.
 - `[ ]` App model picker + CSV logging hooks not present.
 - `[ ]` KG-guided strategy blocked — requires KG v1 infrastructure (Phase 1 dependency).
 

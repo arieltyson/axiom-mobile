@@ -1,0 +1,75 @@
+{
+  "budget": 20,
+  "created_at_utc": "2026-04-12T10:10:37.049067+00:00",
+  "dataset": {
+    "fingerprint": {
+      "combined_sha256": "bcd03f5e07337b475b28fea85ca01b0a3bb05db3e2dd3657554834ef5231446f",
+      "split_sha256": {
+        "pool": "3c0cdf8dee3aa3f490c703fd1d1be5815b5351e3d0a3d39140ac171101c3b069",
+        "test": "08ce04944cda6a707ce4cdce3f723d33cfa884a05820af44e1c4fdbc91971b48",
+        "val": "6274769fa8fb0b137fe00aa167a404b726d96a1c6a8e45e2dae9e0835b2a16dd"
+      }
+    },
+    "pool_size": 37,
+    "test_size": 10,
+    "val_size": 5
+  },
+  "metrics": {
+    "test": {
+      "exact_match": 0.1,
+      "num_correct": 1,
+      "num_examples": 10,
+      "split_name": "test"
+    },
+    "train_subset": {
+      "exact_match": 1.0,
+      "num_correct": 20,
+      "num_examples": 20,
+      "split_name": "train_subset"
+    },
+    "val": {
+      "exact_match": 0.0,
+      "num_correct": 0,
+      "num_examples": 5,
+      "split_name": "val"
+    }
+  },
+  "model_id": "question_lookup_v0",
+  "notes": "",
+  "run_id": "random_question_lookup_v0_b20_s2",
+  "seed": 2,
+  "selected_ids": [
+    "ex_001",
+    "ex_003",
+    "ex_005",
+    "ex_011",
+    "ex_013",
+    "ex_015",
+    "ex_020",
+    "ex_021",
+    "ex_022",
+    "ex_024",
+    "ex_032",
+    "ex_036",
+    "ex_037",
+    "ex_039",
+    "ex_040",
+    "ex_041",
+    "ex_044",
+    "ex_047",
+    "ex_048",
+    "ex_051"
+  ],
+  "status": "completed",
+  "strategy": "random",
+  "training": {
+    "num_selected": 20,
+    "seed": 2,
+    "summary": {
+      "default_answer": "Off",
+      "train_examples": 20,
+      "unique_answers": 13,
+      "unique_questions": 17
+    }
+  }
+}

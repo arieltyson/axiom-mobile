@@ -1,0 +1,538 @@
+{
+  "config": {
+    "budgets": [
+      5,
+      10,
+      15,
+      20,
+      25,
+      37
+    ],
+    "model_id": "question_lookup_v0",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "strategies_requested": [
+      "random",
+      "uncertainty",
+      "diversity",
+      "kg_guided"
+    ]
+  },
+  "created_at_utc": "2026-04-12T10:10:37.167497+00:00",
+  "dataset": {
+    "fingerprint": {
+      "combined_sha256": "bcd03f5e07337b475b28fea85ca01b0a3bb05db3e2dd3657554834ef5231446f",
+      "split_sha256": {
+        "pool": "3c0cdf8dee3aa3f490c703fd1d1be5815b5351e3d0a3d39140ac171101c3b069",
+        "test": "08ce04944cda6a707ce4cdce3f723d33cfa884a05820af44e1c4fdbc91971b48",
+        "val": "6274769fa8fb0b137fe00aa167a404b726d96a1c6a8e45e2dae9e0835b2a16dd"
+      }
+    },
+    "pool_size": 37,
+    "test_size": 10,
+    "val_size": 5
+  },
+  "runs": [
+    {
+      "budget": 5,
+      "run_id": "random_question_lookup_v0_b5_s0",
+      "seed": 0,
+      "strategy": "random",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "random_question_lookup_v0_b5_s1",
+      "seed": 1,
+      "strategy": "random",
+      "test_em": 0.2,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "random_question_lookup_v0_b5_s2",
+      "seed": 2,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "random_question_lookup_v0_b10_s0",
+      "seed": 0,
+      "strategy": "random",
+      "test_em": 0.0,
+      "train_subset_em": 0.9,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "random_question_lookup_v0_b10_s1",
+      "seed": 1,
+      "strategy": "random",
+      "test_em": 0.0,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "random_question_lookup_v0_b10_s2",
+      "seed": 2,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "random_question_lookup_v0_b15_s0",
+      "seed": 0,
+      "strategy": "random",
+      "test_em": 0.0,
+      "train_subset_em": 0.9333333333333333,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "random_question_lookup_v0_b15_s1",
+      "seed": 1,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "random_question_lookup_v0_b15_s2",
+      "seed": 2,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "random_question_lookup_v0_b20_s0",
+      "seed": 0,
+      "strategy": "random",
+      "test_em": 0.0,
+      "train_subset_em": 0.9,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "random_question_lookup_v0_b20_s1",
+      "seed": 1,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "random_question_lookup_v0_b20_s2",
+      "seed": 2,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "random_question_lookup_v0_b25_s0",
+      "seed": 0,
+      "strategy": "random",
+      "test_em": 0.0,
+      "train_subset_em": 0.84,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "random_question_lookup_v0_b25_s1",
+      "seed": 1,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "random_question_lookup_v0_b25_s2",
+      "seed": 2,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.92,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "random_question_lookup_v0_b37_s0",
+      "seed": 0,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "random_question_lookup_v0_b37_s1",
+      "seed": 1,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "random_question_lookup_v0_b37_s2",
+      "seed": 2,
+      "strategy": "random",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "uncertainty_question_lookup_v0_b5_s0",
+      "seed": 0,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "uncertainty_question_lookup_v0_b5_s1",
+      "seed": 1,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "uncertainty_question_lookup_v0_b5_s2",
+      "seed": 2,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "uncertainty_question_lookup_v0_b10_s0",
+      "seed": 0,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "uncertainty_question_lookup_v0_b10_s1",
+      "seed": 1,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "uncertainty_question_lookup_v0_b10_s2",
+      "seed": 2,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "uncertainty_question_lookup_v0_b15_s0",
+      "seed": 0,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "uncertainty_question_lookup_v0_b15_s1",
+      "seed": 1,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "uncertainty_question_lookup_v0_b15_s2",
+      "seed": 2,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "uncertainty_question_lookup_v0_b20_s0",
+      "seed": 0,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 0.85,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "uncertainty_question_lookup_v0_b20_s1",
+      "seed": 1,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 0.85,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "uncertainty_question_lookup_v0_b20_s2",
+      "seed": 2,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "uncertainty_question_lookup_v0_b25_s0",
+      "seed": 0,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "uncertainty_question_lookup_v0_b25_s1",
+      "seed": 1,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "uncertainty_question_lookup_v0_b25_s2",
+      "seed": 2,
+      "strategy": "uncertainty",
+      "test_em": 0.0,
+      "train_subset_em": 0.8,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "uncertainty_question_lookup_v0_b37_s0",
+      "seed": 0,
+      "strategy": "uncertainty",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "uncertainty_question_lookup_v0_b37_s1",
+      "seed": 1,
+      "strategy": "uncertainty",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "uncertainty_question_lookup_v0_b37_s2",
+      "seed": 2,
+      "strategy": "uncertainty",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "diversity_question_lookup_v0_b5_s0",
+      "seed": 0,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "diversity_question_lookup_v0_b5_s1",
+      "seed": 1,
+      "strategy": "diversity",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 5,
+      "run_id": "diversity_question_lookup_v0_b5_s2",
+      "seed": 2,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "diversity_question_lookup_v0_b10_s0",
+      "seed": 0,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "diversity_question_lookup_v0_b10_s1",
+      "seed": 1,
+      "strategy": "diversity",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 10,
+      "run_id": "diversity_question_lookup_v0_b10_s2",
+      "seed": 2,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "diversity_question_lookup_v0_b15_s0",
+      "seed": 0,
+      "strategy": "diversity",
+      "test_em": 0.2,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "diversity_question_lookup_v0_b15_s1",
+      "seed": 1,
+      "strategy": "diversity",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 15,
+      "run_id": "diversity_question_lookup_v0_b15_s2",
+      "seed": 2,
+      "strategy": "diversity",
+      "test_em": 0.2,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "diversity_question_lookup_v0_b20_s0",
+      "seed": 0,
+      "strategy": "diversity",
+      "test_em": 0.2,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "diversity_question_lookup_v0_b20_s1",
+      "seed": 1,
+      "strategy": "diversity",
+      "test_em": 0.0,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 20,
+      "run_id": "diversity_question_lookup_v0_b20_s2",
+      "seed": 2,
+      "strategy": "diversity",
+      "test_em": 0.2,
+      "train_subset_em": 1.0,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "diversity_question_lookup_v0_b25_s0",
+      "seed": 0,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 0.92,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "diversity_question_lookup_v0_b25_s1",
+      "seed": 1,
+      "strategy": "diversity",
+      "test_em": 0.0,
+      "train_subset_em": 0.92,
+      "val_em": 0.0
+    },
+    {
+      "budget": 25,
+      "run_id": "diversity_question_lookup_v0_b25_s2",
+      "seed": 2,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 0.92,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "diversity_question_lookup_v0_b37_s0",
+      "seed": 0,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "diversity_question_lookup_v0_b37_s1",
+      "seed": 1,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    },
+    {
+      "budget": 37,
+      "run_id": "diversity_question_lookup_v0_b37_s2",
+      "seed": 2,
+      "strategy": "diversity",
+      "test_em": 0.1,
+      "train_subset_em": 0.7297297297297297,
+      "val_em": 0.0
+    }
+  ],
+  "strategies_executed": [
+    "random",
+    "uncertainty",
+    "diversity"
+  ],
+  "strategies_skipped": [
+    {
+      "reason": "KG-guided selection requires KG v1 (~1000 entities + query API) which is not yet implemented.  See docs/TIMELINE.md Phase 1.",
+      "strategy": "kg_guided"
+    }
+  ],
+  "sweep_id": "20260412T101037Z"
+}
