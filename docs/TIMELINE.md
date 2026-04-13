@@ -112,10 +112,10 @@ Deliverable status: `[x]` Complete (export pipeline, accuracy gate, and app inte
 - `[x]` Benchmark-input hardening: `BenchmarkInputProvider` loads persisted real screenshot from Documents or generates a deterministic synthetic test pattern. Auto-benchmark now exercises the full image preprocessing pipeline (`image_loaded=true`) instead of using a blank input.
 - `[x]` Second simulator session: 50-iteration Release build, synthetic test pattern input, p50=98.0ms (PASS), p95=112.8ms (PASS). Validates hardened benchmark path.
 - `[x]` Simulator xctrace workflow validated: Time Profiler and Allocations traces captured via `xcrun xctrace record` with `--attach`. Traces are minimal on Simulator but confirm the tooling pipeline works for physical-device sessions.
-- `[~]` Physical-device profiling session — AT-X (iPhone, iOS 26.4.1) is offline/disconnected. All tooling and benchmark hardening is ready; blocked on USB device connection.
-- `[ ]` Physical-device Instruments traces (Time Profiler, Allocations, Energy Log) — requires connected iPhone.
+- `[x]` Physical-device profiling sessions — AT-X (iPhone 15 Pro Max, A17 Pro, iOS 26.4.1): 2 sessions, 50 iterations each, real Core ML inference. Session 1 (cold): p50=14.0ms, p95=26.2ms. Session 2 (warm, with Time Profiler): p50=14.5ms, p95=22ms. All latency thresholds passed with wide margin.
+- `[x]` Physical-device Instruments trace: Time Profiler captured on AT-X during 30s auto-benchmark session (3.6MB trace).
 
-Deliverable status: `[~]` In progress (benchmark input hardened, xctrace workflow validated on Simulator, physical-device profiling blocked on device connection).
+Deliverable status: `[x]` Complete (physical-device profiling done on AT-X with 2 sessions, Time Profiler trace captured, all latency thresholds pass).
 
 ## Phase 6 (Weeks 15-16): Analysis and Publication
 
@@ -131,10 +131,11 @@ Deliverable status: `[~]` In progress (benchmark input hardened, xctrace workflo
 - `[x]` Design system v0: `DesignSystem/` layer with semantic color, spacing, shape, typography, motion, and elevation tokens. Reusable components: `GlassCard`, `AXPrimaryButtonStyle`, `AXSecondaryButtonStyle`, `StatusBadge`, `SectionHeader`. All feature views refactored to consume tokens. Documented in `docs/DESIGN_SYSTEM.md`.
 - `[x]` Testbed UI redesign: gradient background, glass cards with hierarchy levels, prominent CTA, status badges, collapsible debug section, dashed empty states, metric tiles in benchmark summary.
 - `[x]` Design system v1 polish: custom app icon (1024×1024 programmatic + export script), branded launch screen, haptic feedback tokens (`AXHaptics`) mapped to 9 interaction points, staggered card entrance animations (`AXTransition`), iPad responsive layout (`AXLayout.axResponsiveContainer()`), light mode contrast refinement, TipKit onboarding (4 contextual tips).
-- `[ ]` Paper revision with physical-device data (blocked on iPhone connection).
+- `[x]` Paper assets regenerated with physical-device data: device_profile_summary.csv (4 sessions), results_snapshot.md, Pareto view with real latency (14.0ms on A17 Pro).
+- `[x]` Input-contract UX guardrail: domain hint in ScreenshotSection ("Import a mobile app screenshot"), AnswerCard footer explaining 24-class fixed vocabulary for tiny_multimodal_v0. Addresses out-of-domain input confusion without model changes.
 - `[ ]` Final presentation / slide deck.
 
-Deliverable status: `[~]` In progress (paper draft v1, demo flow, asset generator, and design system v1 complete; physical-device data and final revision remain).
+Deliverable status: `[~]` In progress (physical-device data, paper assets, and UX guardrail complete; final presentation remains).
 
 ## Next Practical Milestones
 
@@ -157,9 +158,11 @@ Deliverable status: `[~]` In progress (paper draft v1, demo flow, asset generato
 - `[x]` Device-profile summarizer exercised on real session data (Phase 5).
 - `[x]` Benchmark-input hardening: `BenchmarkInputProvider` with persisted/synthetic screenshot support; `image_loaded=true` for all iterations.
 - `[x]` xctrace profiling workflow validated on Simulator (Time Profiler + Allocations).
-- `[~]` Physical-device profiling run on iPhone hardware (Phase 5) — all tooling ready, blocked on USB device connection.
-- `[ ]` Physical-device Instruments traces: Time Profiler, Allocations, Energy Log (Phase 5).
+- `[x]` Physical-device profiling on AT-X (iPhone 15 Pro Max, A17 Pro): 2 sessions × 50 iterations, p50=14.0ms/14.5ms, all thresholds pass.
+- `[x]` Physical-device Time Profiler trace captured on AT-X (30s session, 3.6MB).
 - `[x]` Phase 6: Statistical analysis package — bootstrap CIs, paired comparisons, power-law fits, Pareto views, reproducible outputs.
 - `[x]` Phase 6: Paper draft v1 + demo flow + asset generator + `--demo-mode` launch argument.
 - `[x]` Phase 6: Design system v1 — app icon, launch screen, haptic refinement, staggered transitions, iPad layout, light mode polish, TipKit onboarding.
-- `[ ]` Phase 6: Paper revision with physical-device data, final presentation.
+- `[x]` Phase 6: Paper assets regenerated with physical-device data (4 sessions, Pareto view with real latency).
+- `[x]` Phase 6: Input-contract UX guardrail for out-of-domain inputs.
+- `[ ]` Phase 6: Final presentation / slide deck.

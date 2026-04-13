@@ -50,6 +50,13 @@ struct AnswerCard: View {
                         variant: .warning,
                         icon: "info.circle"
                     )
+                } else if result.modelID == "tiny_multimodal_v0" {
+                    Text(
+                        "This model classifies mobile app screenshots into a fixed set of 24 answer categories. Results on non-screenshot images or open-ended questions may not be meaningful."
+                    )
+                    .font(AXFont.caption)
+                    .foregroundStyle(AXColor.textTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
