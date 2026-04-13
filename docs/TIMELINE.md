@@ -1,6 +1,6 @@
 # AXIOM-Mobile Timeline and Progress Tracker
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 This file tracks the 16-week project plan and marks what is complete based on the current repository state.
 
@@ -109,10 +109,13 @@ Deliverable status: `[x]` Complete (export pipeline, accuracy gate, and app inte
 - `[x]` Session staging script: `ml/scripts/stage_device_profile_session.py` copies app exports into `results/device_profiles/` following the documented session contract.
 - `[x]` Auto-benchmark launch argument: `--auto-benchmark` triggers a headless benchmark session for repeatable profiling workflows.
 - `[x]` Summarizer exercised on real session data: per-session JSON, aggregate `summary.json`, `summary.csv`, `summary.md` written to `results/device_profiles/analysis/`.
-- `[ ]` Physical-device profiling session (not yet run — simulator only so far).
-- `[ ]` Instruments traces (Time Profiler, Allocations, Energy Log) not yet captured.
+- `[x]` Benchmark-input hardening: `BenchmarkInputProvider` loads persisted real screenshot from Documents or generates a deterministic synthetic test pattern. Auto-benchmark now exercises the full image preprocessing pipeline (`image_loaded=true`) instead of using a blank input.
+- `[x]` Second simulator session: 50-iteration Release build, synthetic test pattern input, p50=98.0ms (PASS), p95=112.8ms (PASS). Validates hardened benchmark path.
+- `[x]` Simulator xctrace workflow validated: Time Profiler and Allocations traces captured via `xcrun xctrace record` with `--attach`. Traces are minimal on Simulator but confirm the tooling pipeline works for physical-device sessions.
+- `[~]` Physical-device profiling session — AT-X (iPhone, iOS 26.4.1) is offline/disconnected. All tooling and benchmark hardening is ready; blocked on USB device connection.
+- `[ ]` Physical-device Instruments traces (Time Profiler, Allocations, Energy Log) — requires connected iPhone.
 
-Deliverable status: `[~]` In progress (first real profiling session captured on Simulator with real Core ML inference; physical-device profiling and Instruments traces remain).
+Deliverable status: `[~]` In progress (benchmark input hardened, xctrace workflow validated on Simulator, physical-device profiling blocked on device connection).
 
 ## Phase 6 (Weeks 15-16): Analysis and Publication
 
@@ -139,7 +142,10 @@ Deliverable status: `[ ]` Not started in current codebase.
 - `[x]` Core ML export pipeline + accuracy gate (Phase 4) — `ml/scripts/export_coreml.py` with 96KB `.mlpackage` output.
 - `[x]` App integration for `.mlpackage` loading (Phase 4 completion) — `CoreMLInferenceService` + bundled model in app.
 - `[ ]` Quantization pipeline (Phase 4 compression — deferred; model is already 96KB).
-- `[x]` Real profiling session on Simulator with `tiny_multimodal_v0` (Phase 5) — p50=199.5ms, p95=304.2ms, both PASS.
+- `[x]` Real profiling sessions on Simulator with `tiny_multimodal_v0` (Phase 5) — 20-iter Debug: p50=199.5ms; 50-iter Release: p50=98.0ms, both PASS.
 - `[x]` Device-profile summarizer exercised on real session data (Phase 5).
-- `[ ]` Physical-device profiling run on iPhone hardware (Phase 5 — publishable results).
-- `[ ]` Instruments traces: Time Profiler, Allocations, Energy Log (Phase 5).
+- `[x]` Benchmark-input hardening: `BenchmarkInputProvider` with persisted/synthetic screenshot support; `image_loaded=true` for all iterations.
+- `[x]` xctrace profiling workflow validated on Simulator (Time Profiler + Allocations).
+- `[~]` Physical-device profiling run on iPhone hardware (Phase 5) — all tooling ready, blocked on USB device connection.
+- `[ ]` Physical-device Instruments traces: Time Profiler, Allocations, Energy Log (Phase 5).
+- `[ ]` Phase 6: Statistical analysis, paper draft, demo flow.

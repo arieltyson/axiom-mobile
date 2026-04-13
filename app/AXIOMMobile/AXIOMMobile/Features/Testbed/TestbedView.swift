@@ -10,7 +10,8 @@ struct TestbedView: View {
                     ScreenshotSection(
                         selectedItem: $viewModel.selectedPhotoItem,
                         image: viewModel.screenshotImage,
-                        onClear: { viewModel.clearScreenshot() }
+                        onClear: { viewModel.clearScreenshot() },
+                        onSaveAsBenchmarkInput: { viewModel.saveBenchmarkScreenshot() }
                     )
 
                     QuestionInputSection(question: $viewModel.question)

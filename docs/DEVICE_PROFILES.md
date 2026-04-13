@@ -1,12 +1,12 @@
 # Device Profiles — Ingestion and Summary Pipeline
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Purpose
 
 This pipeline consumes exported app benchmark sessions (CSV + `_meta.json`), optionally merges manual Instruments trace metrics, computes stable per-session and aggregate performance summaries, and writes reusable analysis artifacts.
 
-**Current state (as of 2026-04-12):** `tiny_multimodal_v0` now runs through `CoreMLInferenceService` with real Core ML inference. Sessions from this model are marked `is_placeholder: false` and the pipeline evaluates latency thresholds as real pass/fail. First session captured on iPhone 17 Pro Simulator: p50=199.5ms (PASS), p95=304.2ms (PASS). Simulator results validate the pipeline but are not publishable — physical-device sessions are needed for final conclusions.
+**Current state (as of 2026-04-13):** `tiny_multimodal_v0` runs through `CoreMLInferenceService` with real Core ML inference. Sessions are marked `is_placeholder: false` and thresholds evaluate as real pass/fail. Two simulator sessions captured: 20-iter Debug (p50=199.5ms) and 50-iter Release with hardened input (p50=98.0ms, `image_loaded=true`). Both PASS all latency thresholds. Benchmark-input hardening via `BenchmarkInputProvider` ensures the full image preprocessing pipeline is exercised. `xctrace` CLI profiling validated on Simulator. Physical-device sessions are needed for publishable conclusions — AT-X (iPhone, iOS 26.4.1) is currently offline.
 
 Other models (`question_lookup_v0`, VLM candidates) still use `PlaceholderInferenceService` and are marked `is_placeholder: true`.
 

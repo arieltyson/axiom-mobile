@@ -31,7 +31,8 @@ AXIOMMobile/
 ├── Services/
 │   ├── InferenceService.swift      Protocol + placeholder implementation
 │   ├── CoreMLInferenceService.swift  Real Core ML inference for tiny_multimodal_v0
-│   └── BenchmarkExporter.swift     CSV export to Documents directory
+│   ├── BenchmarkExporter.swift     CSV export to Documents directory
+│   └── BenchmarkInputProvider.swift  Repeatable benchmark input (persisted/synthetic screenshot)
 ├── Resources/
 │   ├── TinyMultimodal.mlpackage    Exported Core ML model (96KB, 24 classes)
 │   └── tiny_multimodal_v0_labels.json  Label vocabulary (idx → answer mapping)
@@ -175,11 +176,29 @@ xcrun simctl launch booted com.arieljtyson.AXIOMMobile --auto-benchmark
 
 This automatically:
 1. Selects `tiny_multimodal_v0` (first Core ML-ready model)
-2. Sets a fixed question ("What is shown on screen?")
-3. Runs 20 benchmark iterations with real Core ML inference
-4. Exports CSV + `_meta.json` to the app's Documents directory
+2. Loads a representative benchmark image via `BenchmarkInputProvider`
+3. Sets a fixed question ("What is shown on screen?")
+4. Runs 50 benchmark iterations with real Core ML inference
+5. Exports CSV + `_meta.json` to the app's Documents directory
 
-To stage the results into the repo:
+### Benchmark Input
+
+The auto-benchmark uses `BenchmarkInputProvider` to ensure the full image preprocessing pipeline is exercised:
+
+1. **Persisted screenshot** (preferred): If `benchmark_screenshot.png` exists in the app's Documents directory, it is loaded. This is the ideal path for publishable profiling.
+2. **Synthetic test pattern** (fallback): If no persisted screenshot is found, a deterministic 390×844 gradient+noise image is generated. This exercises the full `CVPixelBuffer` resize/conversion pipeline with non-trivial pixel data.
+
+To persist a real screenshot for future runs:
+
+```bash
+# Option A: Use the app UI — import a screenshot, then tap "Save as Benchmark Input"
+
+# Option B: Copy directly to Documents (Simulator):
+DOCS=$(xcrun simctl get_app_container booted com.arieljtyson.AXIOMMobile data)/Documents
+cp /path/to/screenshot.png "$DOCS/benchmark_screenshot.png"
+```
+
+### Staging results
 
 ```bash
 python3 ml/scripts/stage_device_profile_session.py \

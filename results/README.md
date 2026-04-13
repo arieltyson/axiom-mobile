@@ -42,12 +42,12 @@ The summary pipeline (`ml/scripts/summarize_device_profiles.py`) ingests session
 
 Synthetic test fixtures live in `results/device_profiles/_fixtures/` and are not production data.
 
-### First real session
+### Simulator sessions
 
-The first real Core ML profiling session was captured on 2026-04-12:
-- `iphone17pro-sim_tiny_multimodal_v0_20260412T212027Z/` — iPhone 17 Pro Simulator, 20 iterations, `is_placeholder: false`
-- Latency: p50=199.5ms (PASS), p95=304.2ms (PASS)
-- Simulator-only — not publishable; validates the full pipeline end-to-end
+Two simulator sessions validate the profiling pipeline (not publishable):
+
+1. `iphone17pro-sim_tiny_multimodal_v0_20260412T212027Z/` — 20 iterations, Debug build, blank input. p50=199.5ms, p95=304.2ms (PASS).
+2. `iphone17pro-sim_tiny_multimodal_v0_20260413T034245Z/` — 50 iterations, Release build, synthetic test pattern (`image_loaded=true`). p50=98.0ms, p95=112.8ms (PASS). Includes `trace_metrics.json` sidecar and xctrace validation.
 
 ### Staging new sessions
 

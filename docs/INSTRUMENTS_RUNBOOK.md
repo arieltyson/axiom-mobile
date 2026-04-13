@@ -1,6 +1,6 @@
 # Instruments Profiling Runbook — Phase 5
 
-Last updated: 2026-04-13
+Last updated: 2026-04-13 (v2)
 
 ## 1. Purpose
 
@@ -12,12 +12,13 @@ This runbook defines a reproducible protocol for profiling AXIOM-Mobile on physi
 - CPU utilization, memory footprint, and energy impact (from Instruments traces)
 - Session-level device metadata (from the app's companion `_meta.json` export)
 
-**Current status (as of 2026-04-12):**
+**Current status (as of 2026-04-13):**
 
-- `tiny_multimodal_v0` now runs through `CoreMLInferenceService` with real Core ML inference (`is_placeholder: false`).
-- First real profiling session captured on iPhone 17 Pro Simulator: p50=199.5ms, p95=304.2ms (both PASS thresholds).
-- Simulator results validate the full pipeline but are **not publishable** (no NPU, no real thermal/energy behavior).
-- Physical-device profiling is unblocked and is the next step for publishable results.
+- `tiny_multimodal_v0` runs through `CoreMLInferenceService` with real Core ML inference (`is_placeholder: false`).
+- Benchmark-input hardening complete: `BenchmarkInputProvider` loads a persisted real screenshot or generates a deterministic synthetic test pattern. Auto-benchmark now exercises the full image preprocessing pipeline (`image_loaded=true`).
+- Two simulator sessions captured: 20-iter Debug (p50=199.5ms), 50-iter Release (p50=98.0ms). Both PASS all latency thresholds.
+- `xctrace` CLI profiling validated on Simulator: Time Profiler and Allocations traces captured via `xcrun xctrace record --attach`.
+- Physical device AT-X (iOS 26.4.1) is **offline/disconnected**. All tooling is ready; blocked on USB device connection.
 - The `--auto-benchmark` launch argument enables headless profiling without manual UI interaction.
 
 ## 2. Supported Environments
@@ -273,9 +274,51 @@ This validates session folders, computes latency stats and threshold evaluations
 ### When this runbook produces publishable results
 
 - [x] A real Core ML model (`.mlpackage`) is integrated via `CoreMLInferenceService` — `tiny_multimodal_v0` (96KB, 24 classes)
-- [x] `is_placeholder` flips to `false` in CSV and metadata exports — confirmed in simulator session
+- [x] `is_placeholder` flips to `false` in CSV and metadata exports — confirmed in simulator sessions
 - [x] Auto-benchmark mode (`--auto-benchmark`) enables repeatable headless profiling
-- [ ] Profiling is run on the target hardware (iPhone 14 Pro + M2 MacBook)
-- [ ] At least 50 iterations per model per device are collected (simulator session used 20)
-- [ ] Energy Log traces confirm < 5% battery drain per hour
-- [ ] Allocations traces confirm < 500MB peak memory
+- [x] Benchmark-input hardening: `BenchmarkInputProvider` exercises full image preprocessing (`image_loaded=true`)
+- [x] 50-iteration Release build validated on Simulator: p50=98.0ms, p95=112.8ms (both PASS)
+- [x] `xctrace` CLI profiling workflow validated on Simulator (Time Profiler + Allocations)
+- [ ] Profiling is run on the target hardware (iPhone 14 Pro / AT-X + M2 MacBook) — device currently offline
+- [ ] Energy Log traces confirm < 5% battery drain per hour (physical device only)
+- [ ] Allocations traces confirm < 500MB peak memory (physical device required for meaningful data)
+
+### Physical-device profiling handoff
+
+When the iPhone is connected via USB:
+
+```bash
+# 1. Verify device is visible
+xcrun xctrace list devices
+
+# 2. Build and install Release build via Xcode (Product > Profile, or:)
+xcodebuild -scheme AXIOMMobile -sdk iphoneos -configuration Release \
+    -destination 'platform=iOS,id=00008130-001A481A3CA0001C' \
+    build 2>&1 | tail -5
+
+# 3. Launch auto-benchmark
+xcrun devicectl device process launch \
+    --device 00008130-001A481A3CA0001C \
+    com.arieljtyson.AXIOMMobile -- --auto-benchmark
+
+# 4. Wait ~30s for 50 iterations to complete
+
+# 5. Run xctrace Time Profiler (in a separate run for clean measurement)
+xcrun simctl terminate ... # (use devicectl for physical device)
+xcrun devicectl device process launch ...
+xcrun xctrace record --template "Time Profiler" \
+    --device 00008130-001A481A3CA0001C \
+    --attach <PID> --output time_profiler.trace --time-limit 45s
+
+# 6. Repeat for Allocations and Energy Log templates
+
+# 7. Stage session
+python3 ml/scripts/stage_device_profile_session.py \
+    --source-dir /path/to/exported/files \
+    --device-name "atx-iphone"
+
+# 8. Create trace_metrics.json manually from Instruments data
+
+# 9. Run summarizer
+python3 ml/scripts/summarize_device_profiles.py
+```
