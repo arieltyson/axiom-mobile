@@ -1,12 +1,11 @@
 # AXIOM-Mobile Phase 6 Statistical Analysis Report
 
-Generated: 2026-04-13T04:12:04Z
+Generated: 2026-04-13T06:35:14Z
 Version: 0.1.0
 Overall status: **partial**
 
 ## Key Notes
 
-- All device profiling is simulator-only. Physical-device evidence is required before publishing performance conclusions.
 - Learning-curve analysis is based on a small dataset (52 examples) with a heuristic lookup baseline. Results validate the pipeline but are not yet publication-ready.
 - This analysis package is designed to absorb future physical-device data and larger-dataset runs with no code changes.
 
@@ -89,8 +88,8 @@ Dataset: pool=37, val=5, test=10
 
 ## 3. Device-Profile Performance
 
-**Status:** simulator_only
-**Reason:** 2 simulator session(s), 0 physical-device session(s).
+**Status:** complete
+**Reason:** 2 simulator session(s), 2 physical-device session(s).
 
 ### Simulator Sessions (not publishable)
 
@@ -101,12 +100,14 @@ Dataset: pool=37, val=5, test=10
 
 ### Physical-Device Sessions
 
-**No physical-device sessions captured yet.** This is the primary remaining blocker for publishable results.
+| Model | Records | p50 (ms) | p95 (ms) | Mean (ms) | Status |
+|-------|---------|----------|----------|-----------|--------|
+| tiny_multimodal_v0 | 50 | 14.0 | 26.2 | 18.0 | complete |
+| tiny_multimodal_v0 | 50 | 14.5 | 22.0 | 16.8 | complete |
 
-**Memory:** physical_device_required — No physical-device Instruments Allocations trace captured yet.
+**Memory:** complete — Physical-device memory data available.
 **Energy:** physical_device_required — Energy Log requires physical device. Instruments reports relative levels (0-20 scale), not battery %/hr. Not available from Simulator.
 
-> All latency data is from Simulator only. These validate the instrumentation pipeline but are NOT publishable on-device evidence.
 
 ## 4. Pareto Analysis (Quality vs Efficiency)
 
@@ -115,9 +116,8 @@ Dataset: pool=37, val=5, test=10
 | Model | Test EM | Latency p50 (ms) | Lat. Env | Size (MB) | Pareto? |
 |-------|---------|------------------|----------|-----------|---------|
 | question_lookup_v0 | 0.1000 | — | unavailable | 0.1 | Yes |
-| tiny_multimodal_v0 | 0.1000 | 199.5 | simulator | 0.5 | Yes |
+| tiny_multimodal_v0 | 0.1000 | 14.0 | physical_device | 0.5 | Yes |
 
-> All latency data is from Simulator. Pareto conclusions are preliminary and not publishable.
 
 ## What This Report Does NOT Prove
 

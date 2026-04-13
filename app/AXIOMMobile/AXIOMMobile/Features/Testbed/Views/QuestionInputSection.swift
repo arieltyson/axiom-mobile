@@ -10,7 +10,7 @@ struct QuestionInputSection: View {
                 SectionHeader("Question", icon: "text.bubble")
 
                 TextField(
-                    "What app is shown in this screenshot?",
+                    "e.g. What app is shown in this screenshot?",
                     text: $question,
                     axis: .vertical
                 )

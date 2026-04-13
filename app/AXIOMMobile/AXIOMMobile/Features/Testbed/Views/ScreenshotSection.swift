@@ -77,7 +77,7 @@ struct ScreenshotSection: View {
                     Image(systemName: "photo.badge.plus")
                         .font(.system(size: 28, weight: .light))
                         .foregroundStyle(AXColor.textTertiary)
-                    Text("No screenshot selected")
+                    Text("Import a mobile app screenshot")
                         .font(AXFont.caption)
                         .foregroundStyle(AXColor.textTertiary)
                 }

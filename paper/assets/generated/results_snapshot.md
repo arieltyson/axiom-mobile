@@ -29,19 +29,17 @@ Overall status: **partial**
 ## Device Profiles
 
 - Simulator sessions: 2
-- Physical-device sessions: 0
+- Physical-device sessions: 2
 - Best simulator p50: 98.0 ms (50 iterations, Release)
-- **Physical-device data: NOT YET AVAILABLE**
 
 ## Pareto Summary
 
 - Points: 2
 - Status: partial
 - question_lookup_v0: EM=0.100, latency=unavailable, size=0.1 MB
-- tiny_multimodal_v0: EM=0.100, latency=199.5 ms (simulator), size=0.5 MB
+- tiny_multimodal_v0: EM=0.100, latency=14.0 ms (physical_device), size=0.5 MB
 
 ## Caveats
 
-- All device profiling is simulator-only. Physical-device evidence is required before publishing performance conclusions.
 - Learning-curve analysis is based on a small dataset (52 examples) with a heuristic lookup baseline. Results validate the pipeline but are not yet publication-ready.
 - This analysis package is designed to absorb future physical-device data and larger-dataset runs with no code changes.
