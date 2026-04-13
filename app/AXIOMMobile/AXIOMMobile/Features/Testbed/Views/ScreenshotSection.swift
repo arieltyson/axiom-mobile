@@ -5,6 +5,7 @@ struct ScreenshotSection: View {
     @Binding var selectedItem: PhotosPickerItem?
     let image: UIImage?
     let onClear: () -> Void
+    var onSaveAsBenchmarkInput: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -38,6 +39,23 @@ struct ScreenshotSection: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
+
+            if image != nil, let onSave = onSaveAsBenchmarkInput {
+                Button {
+                    onSave()
+                } label: {
+                    Label(
+                        "Save as Benchmark Input",
+                        systemImage: "square.and.arrow.down"
+                    )
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(.orange)
+                .accessibilityHint(
+                    "Persists this screenshot for repeatable auto-benchmark profiling sessions"
+                )
+            }
         }
         .padding()
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))

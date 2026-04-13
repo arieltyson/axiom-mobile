@@ -1,14 +1,14 @@
 # Device Profiles — Ingestion and Summary Pipeline
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Purpose
 
 This pipeline consumes exported app benchmark sessions (CSV + `_meta.json`), optionally merges manual Instruments trace metrics, computes stable per-session and aggregate performance summaries, and writes reusable analysis artifacts.
 
-**Current state:** All inference runs through `PlaceholderInferenceService`, which simulates latency without real model computation. Sessions are explicitly marked `is_placeholder: true` and the pipeline flags them as not valid for publishable device-performance conclusions.
+**Current state (as of 2026-04-13):** `tiny_multimodal_v0` runs through `CoreMLInferenceService` with real Core ML inference. Sessions are marked `is_placeholder: false` and thresholds evaluate as real pass/fail. Two simulator sessions captured: 20-iter Debug (p50=199.5ms) and 50-iter Release with hardened input (p50=98.0ms, `image_loaded=true`). Both PASS all latency thresholds. Benchmark-input hardening via `BenchmarkInputProvider` ensures the full image preprocessing pipeline is exercised. `xctrace` CLI profiling validated on Simulator. Physical-device sessions are needed for publishable conclusions — AT-X (iPhone, iOS 26.4.1) is currently offline.
 
-**When this becomes real:** After Phase 4 (Core ML conversion), real inference sessions will produce `is_placeholder: false` and the same pipeline will generate publishable summaries unchanged.
+Other models (`question_lookup_v0`, VLM candidates) still use `PlaceholderInferenceService` and are marked `is_placeholder: true`.
 
 ## Session Folder Contract
 

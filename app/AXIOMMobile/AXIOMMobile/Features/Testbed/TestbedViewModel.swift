@@ -167,6 +167,63 @@ final class TestbedViewModel {
         screenshotImage = nil
     }
 
+    // MARK: - Auto-Benchmark
+
+    /// Whether the app was launched with `--auto-benchmark` for headless profiling.
+    var isAutoBenchmarkRequested: Bool {
+        ProcessInfo.processInfo.arguments.contains("--auto-benchmark")
+    }
+
+    /// Runs a complete benchmark session automatically for profiling workflows.
+    ///
+    /// Uses `tiny_multimodal_v0` with a representative benchmark input:
+    /// - If a `benchmark_screenshot.png` exists in Documents (placed by a
+    ///   one-time manual import), it is loaded for real image preprocessing.
+    /// - Otherwise, a deterministic synthetic test pattern is generated so
+    ///   the full pixel-buffer pipeline is exercised (not a blank image).
+    ///
+    /// Exports CSV + `_meta.json` to the app's Documents directory on completion.
+    func runAutoBenchmark() async {
+        // Select the Core ML-ready model
+        guard let coreMLModel = ModelCatalog.all.first(where: { $0.isCoreMLReady }) else {
+            return
+        }
+        selectedModel = coreMLModel
+        question = BenchmarkInputProvider.defaultQuestion
+        benchmarkEnabled = true
+        benchmarkIterations = BenchmarkInputProvider.publishableIterations
+
+        // Load a representative benchmark image
+        let (image, source) = BenchmarkInputProvider.loadScreenshot()
+        screenshotImage = image
+        autoBenchmarkImageSource = source
+
+        // Run the benchmark
+        await runBenchmark()
+
+        // Auto-export results
+        exportCSV()
+    }
+
+    /// Describes the image source used for the last auto-benchmark run.
+    /// Either `"persisted"` (real screenshot from Documents) or
+    /// `"synthetic"` (deterministic test pattern).
+    private(set) var autoBenchmarkImageSource: String?
+
+    /// Saves the currently loaded screenshot as the persisted benchmark input.
+    ///
+    /// Call this once after importing a representative screenshot to enable
+    /// repeatable profiling with real data across `--auto-benchmark` sessions.
+    func saveBenchmarkScreenshot() {
+        guard let image = screenshotImage else { return }
+        try? BenchmarkInputProvider.persistScreenshot(image)
+    }
+
+    /// Whether a persisted benchmark screenshot is available.
+    var hasBenchmarkScreenshot: Bool {
+        BenchmarkInputProvider.hasPersistedScreenshot
+    }
+
     // MARK: - Private
 
     private func appendRecord(

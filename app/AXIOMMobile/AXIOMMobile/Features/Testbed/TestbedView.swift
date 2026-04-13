@@ -10,7 +10,8 @@ struct TestbedView: View {
                     ScreenshotSection(
                         selectedItem: $viewModel.selectedPhotoItem,
                         image: viewModel.screenshotImage,
-                        onClear: { viewModel.clearScreenshot() }
+                        onClear: { viewModel.clearScreenshot() },
+                        onSaveAsBenchmarkInput: { viewModel.saveBenchmarkScreenshot() }
                     )
 
                     QuestionInputSection(question: $viewModel.question)
@@ -56,6 +57,11 @@ struct TestbedView: View {
             .navigationTitle("AXIOM Testbed")
             .onChange(of: viewModel.selectedPhotoItem) { _, _ in
                 Task { await viewModel.loadImage() }
+            }
+            .task {
+                if viewModel.isAutoBenchmarkRequested {
+                    await viewModel.runAutoBenchmark()
+                }
             }
         }
     }

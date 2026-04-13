@@ -42,4 +42,20 @@ The summary pipeline (`ml/scripts/summarize_device_profiles.py`) ingests session
 
 Synthetic test fixtures live in `results/device_profiles/_fixtures/` and are not production data.
 
+### Simulator sessions
+
+Two simulator sessions validate the profiling pipeline (not publishable):
+
+1. `iphone17pro-sim_tiny_multimodal_v0_20260412T212027Z/` — 20 iterations, Debug build, blank input. p50=199.5ms, p95=304.2ms (PASS).
+2. `iphone17pro-sim_tiny_multimodal_v0_20260413T034245Z/` — 50 iterations, Release build, synthetic test pattern (`image_loaded=true`). p50=98.0ms, p95=112.8ms (PASS). Includes `trace_metrics.json` sidecar and xctrace validation.
+
+### Staging new sessions
+
+Use the staging script to copy app exports into the correct folder structure:
+
+```bash
+python3 ml/scripts/stage_device_profile_session.py \
+    --from-simulator --device-name "iphone17pro-sim"
+```
+
 See `docs/DEVICE_PROFILES.md` for the full session contract, schema, and threshold evaluation documentation.
