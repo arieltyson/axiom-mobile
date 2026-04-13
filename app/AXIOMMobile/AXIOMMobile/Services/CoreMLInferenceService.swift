@@ -1,11 +1,14 @@
 import CoreML
 import UIKit
 
-/// Real Core ML inference service for `tiny_multimodal_v0`.
+/// Real Core ML inference service for `tiny_multimodal` model family.
 ///
-/// Loads the bundled `TinyMultimodal.mlpackage` and label vocabulary,
-/// preprocesses the screenshot and question, runs prediction, and
-/// returns the top answer class.
+/// Supports multiple model versions (v0, v1, …) by resolving the correct
+/// `.mlpackage` and label vocabulary based on the selected model ID.
+///
+/// Each version ships with its own bundled resources:
+///   - v0: `TinyMultimodal.mlpackage` + `tiny_multimodal_v0_labels.json`
+///   - v1: `TinyMultimodalV1.mlpackage` + `tiny_multimodal_v1_labels.json`
 ///
 /// This replaces `PlaceholderInferenceService` for models where
 /// `isCoreMLReady` is `true`.
@@ -22,13 +25,44 @@ struct CoreMLInferenceService: InferenceServiceProtocol {
     /// ASCII vocab size for character-level encoding (matches Python `VOCAB_SIZE`).
     private static let vocabSize = 128
 
+    // MARK: - Model Resource Mapping
+
+    /// Maps model IDs to their bundled resource names.
+    private struct ModelResources {
+        let mlpackageName: String
+        let labelsName: String
+
+        /// Known resource mappings for each model version.
+        static func resolve(_ modelID: String) -> ModelResources {
+            switch modelID {
+            case "tiny_multimodal_v1":
+                return ModelResources(
+                    mlpackageName: "TinyMultimodalV1",
+                    labelsName: "tiny_multimodal_v1_labels"
+                )
+            case "tiny_multimodal_v0":
+                return ModelResources(
+                    mlpackageName: "TinyMultimodal",
+                    labelsName: "tiny_multimodal_v0_labels"
+                )
+            default:
+                // Fall back to v1 for any future tiny_multimodal versions
+                return ModelResources(
+                    mlpackageName: "TinyMultimodalV1",
+                    labelsName: "tiny_multimodal_v1_labels"
+                )
+            }
+        }
+    }
+
     // MARK: - InferenceServiceProtocol
 
     func run(model: ModelInfo, image: UIImage?, question: String) async throws -> InferenceResult {
         let start = ContinuousClock.now
 
-        let coreMLModel = try loadModel()
-        let labelVocab = try loadLabelVocab()
+        let resources = ModelResources.resolve(model.id)
+        let coreMLModel = try loadModel(resourceName: resources.mlpackageName)
+        let labelVocab = try loadLabelVocab(resourceName: resources.labelsName)
 
         // Prepare image input
         let imageFeature = try prepareImage(image)
@@ -65,22 +99,22 @@ struct CoreMLInferenceService: InferenceServiceProtocol {
 
     // MARK: - Model Loading
 
-    private func loadModel() throws -> MLModel {
-        guard let modelURL = Bundle.main.url(forResource: "TinyMultimodal", withExtension: "mlmodelc")
-                ?? Bundle.main.url(forResource: "TinyMultimodal", withExtension: "mlpackage") else {
-            throw CoreMLServiceError.modelNotFound
+    private func loadModel(resourceName: String) throws -> MLModel {
+        guard let modelURL = Bundle.main.url(forResource: resourceName, withExtension: "mlmodelc")
+                ?? Bundle.main.url(forResource: resourceName, withExtension: "mlpackage") else {
+            throw CoreMLServiceError.modelNotFound(resourceName)
         }
         let config = MLModelConfiguration()
         config.computeUnits = .all
         return try MLModel(contentsOf: modelURL, configuration: config)
     }
 
-    private func loadLabelVocab() throws -> [Int: String] {
+    private func loadLabelVocab(resourceName: String) throws -> [Int: String] {
         guard let vocabURL = Bundle.main.url(
-            forResource: "tiny_multimodal_v0_labels",
+            forResource: resourceName,
             withExtension: "json"
         ) else {
-            throw CoreMLServiceError.labelVocabNotFound
+            throw CoreMLServiceError.labelVocabNotFound(resourceName)
         }
 
         let data = try Data(contentsOf: vocabURL)
@@ -193,7 +227,7 @@ struct CoreMLInferenceService: InferenceServiceProtocol {
     /// Decodes logits into a label, softmax confidence, and class count.
     ///
     /// Softmax is computed in a numerically stable way (subtract max before exp)
-    /// to produce a proper probability distribution over the 24-class vocabulary.
+    /// to produce a proper probability distribution over the answer vocabulary.
     private func decodeOutput(_ output: MLFeatureProvider, labelVocab: [Int: String]) -> Prediction {
         guard let logitsValue = output.featureValue(for: "logits"),
               let logits = logitsValue.multiArrayValue else {
@@ -254,16 +288,16 @@ struct CoreMLInferenceService: InferenceServiceProtocol {
 // MARK: - Errors
 
 enum CoreMLServiceError: LocalizedError {
-    case modelNotFound
-    case labelVocabNotFound
+    case modelNotFound(String)
+    case labelVocabNotFound(String)
     case imageConversionFailed
 
     var errorDescription: String? {
         switch self {
-        case .modelNotFound:
-            "TinyMultimodal.mlpackage not found in app bundle. Re-export from Python and add to Xcode project."
-        case .labelVocabNotFound:
-            "tiny_multimodal_v0_labels.json not found in app bundle."
+        case .modelNotFound(let name):
+            "\(name).mlpackage not found in app bundle. Re-export from Python and add to Xcode project."
+        case .labelVocabNotFound(let name):
+            "\(name).json not found in app bundle."
         case .imageConversionFailed:
             "Failed to convert UIImage to CGImage for Core ML input."
         }

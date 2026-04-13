@@ -28,16 +28,17 @@ Overall status: **partial**
 
 ## Device Profiles
 
-- Simulator sessions: 2
-- Physical-device sessions: 2
+- Simulator sessions: 3
+- Physical-device sessions: 3
 - Best simulator p50: 98.0 ms (50 iterations, Release)
 
 ## Pareto Summary
 
-- Points: 2
+- Points: 3
 - Status: partial
 - question_lookup_v0: EM=0.100, latency=unavailable, size=0.1 MB
 - tiny_multimodal_v0: EM=0.100, latency=14.0 ms (physical_device), size=0.5 MB
+- tiny_multimodal_v1: EM=0.275, latency=14.5 ms (physical_device), size=0.5 MB
 
 ## Caveats
 

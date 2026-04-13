@@ -35,7 +35,7 @@ struct QuestionInputSection: View {
                 }
                 .axAnimation(AXMotion.quick, value: isFocused.wrappedValue)
 
-                if selectedModelID == "tiny_multimodal_v0" {
+                if selectedModelID.hasPrefix("tiny_multimodal_v") {
                     supportedQuestionsHint
                 }
             }
@@ -45,20 +45,27 @@ struct QuestionInputSection: View {
     // MARK: - Supported Questions Hint
 
     private var supportedQuestionsHint: some View {
-        VStack(alignment: .leading, spacing: AXSpacing.xs) {
+        let meta = ModelMetadata.forModel(selectedModelID)
+        let hintText: String = if meta.supportedQuestionTypes.isEmpty {
+            "Is [setting] on or off? \u{00b7} What battery %? \u{00b7} What time is shown? \u{00b7} What temperature? \u{00b7} What Wi-Fi network?"
+        } else {
+            meta.supportedQuestionTypes
+                .prefix(6)
+                .joined(separator: " \u{00b7} ")
+        }
+
+        return VStack(alignment: .leading, spacing: AXSpacing.xs) {
             Text("Supported question types")
                 .font(AXFont.caption.weight(.medium))
                 .foregroundStyle(AXColor.textSecondary)
 
-            Text(
-                "Is [setting] on or off? \u{00b7} What battery %? \u{00b7} What time is shown? \u{00b7} What temperature? \u{00b7} What Wi-Fi network?"
-            )
-            .font(AXFont.caption)
-            .foregroundStyle(AXColor.textTertiary)
+            Text(hintText)
+                .font(AXFont.caption)
+                .foregroundStyle(AXColor.textTertiary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityLabel(
-            "Supported questions: toggle state, battery percentage, time, temperature, Wi-Fi network name"
+            "Supported questions: \(meta.supportedQuestionTypes.joined(separator: ", "))"
         )
     }
 }

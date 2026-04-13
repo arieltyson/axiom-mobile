@@ -1,0 +1,17 @@
+{
+  "model_id": "tiny_multimodal_v0",
+  "model_version": 0,
+  "num_classes": 24,
+  "confidence_threshold": 0.40,
+  "threshold_rationale": "Heuristic: ~10x random baseline (1/24 = 4.2%). Conservative bar that filters collapse-to-frequent-class behavior.",
+  "random_baseline": 0.042,
+  "supported_question_types": [
+    "toggle state (Is [setting] on or off?)",
+    "battery percentage",
+    "time display",
+    "temperature reading",
+    "Wi-Fi network name"
+  ],
+  "task_summary": "24-class screenshot QA classifier trained on dataset v1 (120 pool examples).",
+  "dataset_version": 1
+}

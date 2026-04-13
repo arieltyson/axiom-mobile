@@ -207,7 +207,7 @@ final class TestbedViewModel {
 
     /// Runs a complete benchmark session automatically for profiling workflows.
     ///
-    /// Uses `tiny_multimodal_v0` with a representative benchmark input:
+    /// Uses the first Core ML-ready model (currently `tiny_multimodal_v1`) with a representative benchmark input:
     /// - If a `benchmark_screenshot.png` exists in Documents (placed by a
     ///   one-time manual import), it is loaded for real image preprocessing.
     /// - Otherwise, a deterministic synthetic test pattern is generated so
@@ -248,7 +248,7 @@ final class TestbedViewModel {
 
     /// Runs a single-shot demo inference for presentation setup.
     ///
-    /// Selects `tiny_multimodal_v0`, loads a representative image via
+    /// Selects the first Core ML-ready model, loads a representative image via
     /// `BenchmarkInputProvider`, sets a canonical question, and runs
     /// **one** inference. Leaves the UI in a predictable demo-ready state
     /// showing the result — unlike `runAutoBenchmark()` which runs 50

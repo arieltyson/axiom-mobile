@@ -50,7 +50,7 @@ def instantiate_model(
     if spec.backend == "heuristic" and spec.model_id == "question_lookup_v0":
         return QuestionLookupBaseline(spec)
 
-    if spec.backend == "pytorch" and spec.model_id == "tiny_multimodal_v0":
+    if spec.backend == "pytorch" and spec.model_id.startswith("tiny_multimodal_v"):
         from .tiny_multimodal import TinyMultimodalBaseline
         return TinyMultimodalBaseline(spec, **kwargs)
 

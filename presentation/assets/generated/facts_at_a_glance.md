@@ -16,6 +16,7 @@ Generated for presentation use. All numbers from repo artifacts.
 ## Physical-Device Latency (iPhone 15 Pro Max, A17 Pro)
 - **Session 1 (cold):** p50=14.0ms, p95=26.2ms, mean=18.0ms (50 iterations)
 - **Session 2 (warm):** p50=14.5ms, p95=22.0ms, mean=16.8ms (50 iterations)
+- **Session 3 (warm):** p50=14.5ms, p95=24.6ms, mean=21.3ms (50 iterations)
 - **All latency thresholds:** PASS (28× below p50 limit)
 
 ## Simulator Comparison

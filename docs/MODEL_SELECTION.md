@@ -1,6 +1,6 @@
 # AXIOM-Mobile Model Selection and Baseline Scaffold
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Purpose
 
@@ -136,7 +136,76 @@ python3 ml/scripts/run_trainable_baseline.py \
 - [x] Model catalog — `tiny_multimodal_v0` is first entry with `isCoreMLReady: true`
 - [x] Benchmark pipeline — `isPlaceholder=false` for real Core ML runs; CSV + `_meta.json` export works
 - [ ] Quantization — deferred (model is already 96KB)
-- [ ] Real on-device profiling — unblocked, not yet run
+- [x] Real on-device profiling — completed for both v0 (2 sessions) and v1 (1 session) on AT-X (iPhone 15 Pro Max, A17 Pro); p50=14.0–14.5ms, all latency thresholds PASS
+
+## Trainable Multimodal Baseline v1 (Dataset v2 Refresh)
+
+As of 2026-04-13, the repo has a second version of the trainable baseline:
+
+- `tiny_multimodal_v1`
+
+This model uses the **same architecture** as v0 (3-layer CNN + char-level text encoder + concat fusion) but is trained on **dataset v2** (382 pool examples, 128 normalized answer classes) with class-weighted cross-entropy loss.
+
+### v0 → v1 comparison
+
+| Metric | v0 (24 classes, dataset v1) | v1 (128 classes, dataset v2) |
+|--------|----------------------------|------------------------------|
+| Pool EM | 16.2% | 30.9% |
+| Val EM | 0.0% | 26.7% |
+| Test EM | 10.0% | 27.5% |
+| Parameters | 40,376 | 47,136 |
+| Training epochs | 20 | 40 |
+| Class-weighted loss | No | Yes |
+| Core ML accuracy drop | 0% | 0% |
+
+### What changed
+
+1. **128 normalized answer classes** (vs 24): classification head widened from 24 to 128 outputs
+2. **Class-weighted CE loss**: inverse-frequency weights (capped at 10×) mitigate severe long-tail answer imbalance
+3. **40 training epochs** (vs 20): longer training schedule for larger dataset
+4. **Dataset v2**: 382 pool examples from 152 unique screenshots (vs 37 pool from 52 screenshots)
+
+### Confidence calibration
+
+v1 ships with an empirically calibrated confidence threshold (0.45) instead of v0's heuristic (0.40):
+
+- **Correct predictions**: min confidence ~0.48, mean ~0.74–0.79
+- **Incorrect predictions**: median confidence ~0.04, max ~0.50–0.64
+- **Threshold 0.45**: preserves ~88–91% of correct predictions, filters most incorrect ones
+- **Random baseline**: 1/128 = 0.78% (vs 1/24 = 4.2% for v0)
+
+The threshold is stored in a per-model metadata sidecar (`tiny_multimodal_v1_metadata.json`), not hardcoded in Swift.
+
+### How to run
+
+```bash
+# Train v1 on dataset v2:
+python3 ml/scripts/run_trainable_baseline.py \
+    --model-id tiny_multimodal_v1 \
+    --image-root /path/to/screenshots_v1 \
+    --epochs 40 \
+    --class-weighted \
+    --output-suffix _v2
+
+# Export to Core ML:
+python3 ml/scripts/export_coreml.py \
+    --model-id tiny_multimodal_v1 \
+    --checkpoint-dir results/trainable_baselines/tiny_multimodal_v1_seed0_v2/checkpoint \
+    --image-root /path/to/screenshots_v1 \
+    --output-dir results/coreml_exports/tiny_multimodal_v1_seed0_v2
+
+# Copy artifacts into app:
+cp -R results/coreml_exports/tiny_multimodal_v1_seed0_v2/TinyMultimodal.mlpackage \
+    app/AXIOMMobile/AXIOMMobile/Resources/TinyMultimodalV1.mlpackage
+cp results/coreml_exports/tiny_multimodal_v1_seed0_v2/label_vocab.json \
+    app/AXIOMMobile/AXIOMMobile/Resources/tiny_multimodal_v1_labels.json
+```
+
+### App integration
+
+v1 is the default model in the app. The `CoreMLInferenceService` dispatches by model ID to load the correct `.mlpackage` and label vocab. Both v0 and v1 are available in the model picker.
+
+Model-specific behavior (confidence threshold, class count, supported question types) is driven by metadata sidecars (`{model_id}_metadata.json`) bundled in app Resources, so adding future model versions requires no Swift code changes.
 
 ## Result Artifact Contract
 

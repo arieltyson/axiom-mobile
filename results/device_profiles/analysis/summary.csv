@@ -1,5 +1,7 @@
 session_id,session_dir,export_timestamp,device_model,system_version,model_id,is_placeholder,total_records,benchmark_records,latency_min_ms,latency_max_ms,latency_mean_ms,latency_p50_ms,latency_p95_ms,peak_memory_mb,has_trace_metrics
 CBECA708-51DD-478C-B917-7265169AFB01,atx-iphone15promax_tiny_multimodal_v0_20260413T062922Z,2026-04-13T06:29:22Z,iPhone 15 Pro Max,26.4.1,tiny_multimodal_v0,False,50,50,11,104,18.0,14.0,26.2,,False
 C0A6214D-AECA-49D2-99E5-16394E74E6CE,atx-iphone15promax_tiny_multimodal_v0_20260413T063305Z,2026-04-13T06:33:05Z,iPhone 15 Pro Max,26.4.1,tiny_multimodal_v0,False,50,50,11,61,16.8,14.5,22.0,,False
+64915035-89BE-48E2-A7B7-3CF37AA177F5,atx-iphone15promax_tiny_multimodal_v1_20260413T093459Z,2026-04-13T09:34:59Z,iPhone,26.4.1,tiny_multimodal_v1,False,50,50,11,209,21.3,14.5,24.6,,True
 7B63E41A-3B6E-45F7-A2D2-F167B97ECB9C,iphone17pro-sim_tiny_multimodal_v0_20260412T212027Z,2026-04-12T21:20:27Z,iPhone,26.4,tiny_multimodal_v0,False,20,20,185,498,220.2,199.5,304.2,,False
 0F42493A-3712-4F05-9D36-F93DCF9A4435,iphone17pro-sim_tiny_multimodal_v0_20260413T034245Z,2026-04-13T03:42:45Z,iPhone,26.4,tiny_multimodal_v0,False,50,50,91,282,103.3,98.0,112.8,,True
+531B0C26-CFD3-4ABC-B6D2-EF32D93DB273,iphone17pro-sim_tiny_multimodal_v1_20260413T093425Z,2026-04-13T09:34:25Z,iPhone,26.4,tiny_multimodal_v1,False,50,50,103,709,148.1,125.0,229.5,,False

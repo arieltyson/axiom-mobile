@@ -1,0 +1,17 @@
+{
+  "model_id": "tiny_multimodal_v1",
+  "display_name": "Tiny Multimodal v1",
+  "family": "custom",
+  "backend": "pytorch",
+  "stage": "trainable_baseline",
+  "description": "Dataset-v2 refresh of tiny multimodal baseline. Same CNN+char-level architecture as v0 but trained on 382 pool examples with 134 answer classes and class-weighted cross-entropy loss.",
+  "source": "custom (in-repo)",
+  "notes": "Same architecture as v0 (3-layer CNN + char-level text encoder + concat fusion). Classification head widens from 24 to 134 classes. Class-weighted CE loss mitigates severe answer imbalance. 40 epochs. Dataset v2 (seed=20260413).",
+  "executable": true,
+  "coreml_ready": true,
+  "params_millions": 0.06,
+  "expected_app_footprint_mb": 0.5,
+  "quantization": null,
+  "priority_rank": 1,
+  "supported_capabilities": ["image_qa", "classification"]
+}

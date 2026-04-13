@@ -1,6 +1,6 @@
 # AXIOM-Mobile Phase 6 Statistical Analysis Report
 
-Generated: 2026-04-13T06:42:34Z
+Generated: 2026-04-13T09:37:49Z
 Version: 0.1.0
 Overall status: **partial**
 
@@ -89,7 +89,7 @@ Dataset: pool=37, val=5, test=10
 ## 3. Device-Profile Performance
 
 **Status:** complete
-**Reason:** 2 simulator session(s), 2 physical-device session(s).
+**Reason:** 3 simulator session(s), 3 physical-device session(s).
 
 ### Simulator Sessions (not publishable)
 
@@ -97,6 +97,7 @@ Dataset: pool=37, val=5, test=10
 |-------|---------|----------|----------|-----------|--------|
 | tiny_multimodal_v0 | 20 | 199.5 | 304.2 | 220.2 | simulator_only |
 | tiny_multimodal_v0 | 50 | 98.0 | 112.8 | 103.3 | simulator_only |
+| tiny_multimodal_v1 | 50 | 125.0 | 229.5 | 148.1 | simulator_only |
 
 ### Physical-Device Sessions
 
@@ -104,6 +105,7 @@ Dataset: pool=37, val=5, test=10
 |-------|---------|----------|----------|-----------|--------|
 | tiny_multimodal_v0 | 50 | 14.0 | 26.2 | 18.0 | complete |
 | tiny_multimodal_v0 | 50 | 14.5 | 22.0 | 16.8 | complete |
+| tiny_multimodal_v1 | 50 | 14.5 | 24.6 | 21.3 | complete |
 
 **Memory:** complete — Physical-device memory data available.
 **Energy:** physical_device_required — Energy Log requires physical device. Instruments reports relative levels (0-20 scale), not battery %/hr. Not available from Simulator.
@@ -117,11 +119,12 @@ Dataset: pool=37, val=5, test=10
 |-------|---------|------------------|----------|-----------|---------|
 | question_lookup_v0 | 0.1000 | — | unavailable | 0.1 | Yes |
 | tiny_multimodal_v0 | 0.1000 | 14.0 | physical_device | 0.5 | Yes |
+| tiny_multimodal_v1 | 0.2750 | 14.5 | physical_device | 0.5 | Yes |
 
 
 ## Caveats and Limitations
 
-1. **Physical-device latency measured.** 2 physical-device session(s) captured. Simulator data is retained for pipeline-validation context but is not used for conclusions.
+1. **Physical-device latency measured.** 3 physical-device session(s) captured. Simulator data is retained for pipeline-validation context but is not used for conclusions.
 2. **No statistical significance claims.** With 3 seeds and tiny test/val sets, bootstrap CIs are provided for honesty but should not be over-interpreted.
 3. **No quality conclusions.** The 70% EM target from the research proposal is not met. The current heuristic baseline and tiny multimodal model both achieve ~10% test EM.
 4. **No energy conclusions.** Energy Log data requires physical-device Instruments traces not yet captured.

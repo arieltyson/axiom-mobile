@@ -6,7 +6,17 @@ Last updated: 2026-04-13
 
 This pipeline consumes exported app benchmark sessions (CSV + `_meta.json`), optionally merges manual Instruments trace metrics, computes stable per-session and aggregate performance summaries, and writes reusable analysis artifacts.
 
-**Current state (as of 2026-04-13):** `tiny_multimodal_v0` runs through `CoreMLInferenceService` with real Core ML inference. Sessions are marked `is_placeholder: false` and thresholds evaluate as real pass/fail. Two simulator sessions captured: 20-iter Debug (p50=199.5ms) and 50-iter Release with hardened input (p50=98.0ms, `image_loaded=true`). Two physical-device sessions captured on AT-X (iPhone 15 Pro Max, A17 Pro, iOS 26.4.1): Session 1 (cold, 50 iterations, p50=14.0ms, p95=26.2ms, mean=18.0ms) and Session 2 (warm, with Time Profiler attached, 50 iterations, p50=14.5ms, p95=22.0ms, mean=16.8ms). All sessions PASS latency thresholds with wide margin. Physical device is ~7x faster than simulator (14ms vs 98ms). A 3.6MB Time Profiler trace was captured. Benchmark-input hardening via `BenchmarkInputProvider` ensures the full image preprocessing pipeline is exercised. Energy and memory Instruments traces (Allocations, Energy Log) are still outstanding -- no `trace_metrics.json` sidecar exists for the physical sessions.
+**Current state (as of 2026-04-13):** Both `tiny_multimodal_v0` and `tiny_multimodal_v1` run through `CoreMLInferenceService` with real Core ML inference. Sessions are marked `is_placeholder: false` and thresholds evaluate as real pass/fail.
+
+**v0 sessions (4):**
+- Simulator: 20-iter Debug (p50=199.5ms) and 50-iter Release with hardened input (p50=98.0ms, `image_loaded=true`)
+- Physical device (AT-X, iPhone 15 Pro Max, A17 Pro, iOS 26.4.1): Session 1 (cold, 50 iterations, p50=14.0ms, p95=26.2ms, mean=18.0ms) and Session 2 (warm, with Time Profiler attached, 50 iterations, p50=14.5ms, p95=22.0ms, mean=16.8ms)
+
+**v1 sessions (2):**
+- Simulator: 50-iter Release (p50=125.0ms)
+- Physical device (AT-X, iPhone 15 Pro Max, A17 Pro, iOS 26.4.1): Session 3 (warm, 50 iterations, p50=14.5ms, p95=24.6ms, mean=21.3ms)
+
+**Key findings:** All 6 sessions PASS latency thresholds with wide margin. Physical device is ~7x faster than simulator. Scaling from v0 (24 classes, 40K params) to v1 (128 classes, 47K params) has negligible latency impact on physical device (14.0ms → 14.5ms). Time Profiler traces captured for both v0 (3.6MB) and v1 (8.9MB). Benchmark-input hardening via `BenchmarkInputProvider` ensures the full image preprocessing pipeline is exercised. Energy and memory Instruments traces (Allocations, Energy Log) are still outstanding.
 
 Other models (`question_lookup_v0`, VLM candidates) still use `PlaceholderInferenceService` and are marked `is_placeholder: true`.
 

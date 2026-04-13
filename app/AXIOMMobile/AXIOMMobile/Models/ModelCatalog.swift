@@ -17,7 +17,20 @@ struct ModelInfo: Identifiable, Hashable {
 }
 
 enum ModelCatalog {
+    /// The default model ID used when the app launches.
+    /// v1 is preferred: 128 classes, dataset v2, 27.5% test EM vs v0's 10%.
+    static let defaultModelID = "tiny_multimodal_v1"
+
     static let all: [ModelInfo] = [
+        ModelInfo(
+            id: "tiny_multimodal_v1",
+            displayName: "Tiny Multimodal v1",
+            family: "custom",
+            stage: "trainable_baseline",
+            backend: "coreml",
+            isExecutable: true,
+            isCoreMLReady: true
+        ),
         ModelInfo(
             id: "tiny_multimodal_v0",
             displayName: "Tiny Multimodal v0",
