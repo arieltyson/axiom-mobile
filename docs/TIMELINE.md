@@ -124,10 +124,16 @@ Deliverable status: `[~]` In progress (benchmark input hardened, xctrace workflo
 - `[x]` Honest status vocabulary: every result carries an explicit status (complete, partial, blocked, insufficient_data, simulator_only, physical_device_required, skipped, degenerate).
 - `[x]` Simulator vs physical-device separation enforced in all device-profile analysis.
 - `[x]` Documentation: `docs/STATISTICAL_ANALYSIS.md` covers methods, inputs, outputs, status vocabulary, and extension points.
-- `[ ]` Paper draft file(s) not present in repo.
-- `[ ]` Demo flow integration and final presentation assets not present.
+- `[x]` Paper draft v1: `paper/PAPER_DRAFT_v1.md` — full research paper skeleton grounded in current repo results, with honest limitations throughout.
+- `[x]` Paper asset generator: `ml/scripts/build_paper_assets.py` produces deterministic SVG, CSV, and Markdown assets from analysis outputs.
+- `[x]` Demo flow script: `docs/DEMO_FLOW.md` — rehearsable 3-minute demo with interactive, auto-benchmark, and demo-mode paths.
+- `[x]` Demo mode in app: `--demo-mode` launch argument sets up a single-shot inference with `tiny_multimodal_v0` for presentation-ready state.
+- `[x]` Design system v0: `DesignSystem/` layer with semantic color, spacing, shape, typography, motion, and elevation tokens. Reusable components: `GlassCard`, `AXPrimaryButtonStyle`, `AXSecondaryButtonStyle`, `StatusBadge`, `SectionHeader`. All feature views refactored to consume tokens. Documented in `docs/DESIGN_SYSTEM.md`.
+- `[x]` Testbed UI redesign: gradient background, glass cards with hierarchy levels, prominent CTA, status badges, collapsible debug section, dashed empty states, metric tiles in benchmark summary.
+- `[ ]` Paper revision with physical-device data (blocked on iPhone connection).
+- `[ ]` Final presentation / slide deck.
 
-Deliverable status: `[~]` In progress (statistical analysis package complete; paper draft and demo flow not started).
+Deliverable status: `[~]` In progress (paper draft v1, demo flow, and asset generator complete; physical-device data and final revision remain).
 
 ## Next Practical Milestones
 
@@ -153,4 +159,5 @@ Deliverable status: `[~]` In progress (statistical analysis package complete; pa
 - `[~]` Physical-device profiling run on iPhone hardware (Phase 5) — all tooling ready, blocked on USB device connection.
 - `[ ]` Physical-device Instruments traces: Time Profiler, Allocations, Energy Log (Phase 5).
 - `[x]` Phase 6: Statistical analysis package — bootstrap CIs, paired comparisons, power-law fits, Pareto views, reproducible outputs.
-- `[ ]` Phase 6: Paper draft and demo flow.
+- `[x]` Phase 6: Paper draft v1 + demo flow + asset generator + `--demo-mode` launch argument.
+- `[ ]` Phase 6: Paper revision with physical-device data, final presentation.
