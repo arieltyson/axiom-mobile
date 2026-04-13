@@ -136,7 +136,7 @@ python3 ml/scripts/run_trainable_baseline.py \
 - [x] Model catalog — `tiny_multimodal_v0` is first entry with `isCoreMLReady: true`
 - [x] Benchmark pipeline — `isPlaceholder=false` for real Core ML runs; CSV + `_meta.json` export works
 - [ ] Quantization — deferred (model is already 96KB)
-- [ ] Real on-device profiling — unblocked, not yet run
+- [x] Real on-device profiling — completed for both v0 (2 sessions) and v1 (1 session) on AT-X (iPhone 15 Pro Max, A17 Pro); p50=14.0–14.5ms, all latency thresholds PASS
 
 ## Trainable Multimodal Baseline v1 (Dataset v2 Refresh)
 

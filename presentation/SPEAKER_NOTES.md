@@ -1,4 +1,4 @@
-# Speaker Notes -- AXIOM-Mobile Presentation
+# Speaker Notes -- AXIOM-Mobile Presentation (Slide Deck v2)
 
 Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
@@ -40,25 +40,25 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## Slide 5: Dataset (45 seconds)
 
-**Say**: "Our dataset consists of 52 screenshot-question-answer triples collected from real iOS applications, covering 24 answer classes. We use a frozen split: 37 examples in the training pool, 5 for validation, and 10 for test. The screenshots are private and stored off-repo. We currently have a single annotator; dual-annotator agreement is planned but not yet completed."
+**Say**: "Dataset v2 contains 452 screenshot-question-answer triples collected from 152 real iOS screenshots, covering 128 answer classes -- a significant expansion from the original 52-example, 24-class dataset v1. We use a frozen split: 382 examples for training, with held-out validation and test sets. The screenshots are private and stored off-repo. We currently have a single annotator; dual-annotator agreement is planned but not yet completed."
 
-**Do not claim**: That the dataset is large enough. Acknowledge 52 is small.
+**Do not claim**: That the dataset is large enough. 452 examples across 128 classes is still only ~3.5 per class on average.
 
 ---
 
 ## Slide 6: Models (45 seconds)
 
-**Say**: "We evaluated two models. The first is a heuristic lookup baseline that memorizes question-to-answer mappings. The second is a 40-thousand-parameter CNN-plus-embedding model trained from scratch, which exports to a 96-kilobyte Core ML file. Both achieve about 10% test exact match. These models exist to validate the pipeline, not to represent our best possible accuracy."
+**Say**: "We have two model generations. The v0 baseline is a 40-thousand-parameter CNN-plus-embedding model trained on 37 examples across 24 classes, achieving about 10% test EM. The current default, tiny_multimodal_v1, is a 47-thousand-parameter model trained on 382 examples across 128 classes using dataset v2, achieving 27.5% test EM -- a 2.75x improvement over v0. The app uses model metadata sidecars to set per-model confidence thresholds (0.45 for v1). Both models exist to validate and iterate on the pipeline."
 
-**Emphasis**: "Pipeline validation, not final models." This framing is critical.
+**Emphasis**: v1 achieves 27.5% test EM on 128 classes -- 2.75x improvement over v0 -- but still far from the 70% target.
 
-**Do not claim**: That 10% EM is a meaningful accuracy result on its own.
+**Do not claim**: That 27.5% EM is a strong accuracy result. It is progress, not success.
 
 ---
 
 ## Slide 7: Selection Strategies (45 seconds)
 
-**Say**: "We implemented three active-learning selection strategies: random sampling, uncertainty-based selection using prediction entropy, and diversity-based selection using k-center greedy. A fourth strategy, guided by a knowledge graph, is blocked pending KG infrastructure. We ran a full sweep: three strategies, six budget levels, three random seeds -- 54 runs total."
+**Say**: "We implemented three active-learning selection strategies: random sampling, uncertainty-based selection using prediction entropy, and diversity-based selection using k-center greedy. A fourth strategy, guided by a knowledge graph, is blocked pending KG infrastructure. We ran a full sweep: three strategies, six budget levels, three random seeds -- 54 runs total. Note: these selection sweeps were conducted under the v0/dataset-v1 regime with 52 examples. Re-running them with dataset v2 is a planned next step."
 
 **Transition**: "Let's look at what those 54 runs produced."
 
@@ -66,19 +66,19 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## Slide 8: Learning Curves (1 minute)
 
-**Say**: "Here are the learning curves. The key finding is negative: all strategies converge to the same 10% exact match at full pool size, and the power-law fits have very low R-squared values. The uncertainty strategy is degenerate -- it produces all-zero predictions at every budget except the maximum. The conclusion is straightforward: with only 52 examples, there is not enough signal to differentiate strategies."
+**Say**: "Here are the learning curves from the v0/dataset-v1 regime. The key finding is negative: all strategies converge to the same 10% exact match at full pool size, and the power-law fits have very low R-squared values. The uncertainty strategy is degenerate -- it produces all-zero predictions at every budget except the maximum. With only 52 examples, there was not enough signal to differentiate strategies. These curves have not yet been re-run with dataset v2's 452 examples -- that is a planned next step."
 
-**Emphasis**: This is an honest negative result, not a failure. It tells us the dataset must grow.
+**Emphasis**: These learning curves are still from v0/dataset-v1. Re-running with dataset v2 is needed to see whether the larger dataset provides enough signal.
 
-**Do not claim**: That any strategy is better than another at this scale.
+**Do not claim**: That any strategy is better than another at the v0 scale, or that v1's 27.5% EM invalidates these curves (they were run under different conditions).
 
 ---
 
 ## Slide 9: On-Device Latency Results (1 minute)
 
-**Say**: "For latency, we measured on a physical iPhone 15 Pro Max with an A17 Pro chip. In a cold-start session, the median latency was 14 milliseconds with a 95th percentile of 26 milliseconds. A warm session was comparable. The physical device is about seven times faster than the simulator in release mode. Both sessions pass all latency thresholds with a 28-times margin."
+**Say**: "For latency, we measured on a physical iPhone 15 Pro Max with an A17 Pro chip. The v0 model (24 classes) had p50=14.0ms. The v1 model (128 classes, 47K params) has p50=14.5ms -- essentially identical, confirming that scaling from 24 to 128 classes has negligible latency cost. Both pass all latency thresholds with a 28-times margin."
 
-**Emphasis**: Physical device measurement, not simulator. The 28x margin means latency is not the bottleneck.
+**Emphasis**: v1 physical-device latency (14.5ms) is essentially identical to v0 (14.0ms), confirming that scaling from 24 to 128 classes has negligible latency cost. Physical device measurement, not simulator.
 
 ---
 
@@ -92,11 +92,11 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## Slide 11: Effectiveness Threshold Scorecard (1 minute)
 
-**Say**: "Three of six thresholds pass: both latency targets and the model size target. Energy and memory are not yet measured -- we need Instruments traces for those. The quality threshold fails: 10% exact match versus the 70% target. This is the primary gap, and closing it requires both a larger dataset and a stronger model."
+**Say**: "Three of six thresholds pass: both latency targets and the model size target. Energy and memory are not yet measured -- we need Instruments traces for those. The quality threshold still fails: v1 achieves 27.5% test exact match versus the 70% target -- a 2.75x improvement over v0's 10%, but still far from the goal. Closing this gap requires continued dataset scaling and a stronger model architecture."
 
-**Emphasis**: Honest accounting. Do not minimize the EM failure or overstate the latency success.
+**Emphasis**: Honest accounting. 27.5% is real progress over 10%, but do not minimize the remaining gap to 70%.
 
-**Do not claim**: That passing 3/6 means the system is "mostly effective."
+**Do not claim**: That passing 3/6 means the system is "mostly effective," or that 27.5% is close to the target.
 
 ---
 
@@ -128,7 +128,7 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## Slide 15: Limitations (1 minute)
 
-**Say**: "We want to be upfront about limitations. The quality gap is large -- 10% versus 70%. The dataset is small. The model has only 40 thousand parameters with no pretrained weights. We have a single annotator. Energy and memory are unmeasured. The KG-guided strategy is blocked. And three seeds per condition is not enough for reliable bootstrap intervals."
+**Say**: "We want to be upfront about limitations. The quality gap remains large -- 27.5% versus 70%, even after scaling to 128 classes and 452 examples. The v1 model has only 47 thousand parameters with no pretrained weights. Learning curves and selection sweeps are still from the v0/dataset-v1 regime (52 examples) and need to be re-run with dataset v2. We have a single annotator. Energy and memory are unmeasured. The KG-guided strategy is blocked. And three seeds per condition is not enough for reliable bootstrap intervals."
 
 **Emphasis**: Read these as facts, not apologies. The pipeline is designed to address each one.
 
@@ -138,7 +138,7 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## Slide 16: Key Contributions (1 minute)
 
-**Say**: "Despite the limitations, we make four contributions. First, a fully reproducible end-to-end pipeline from data curation through deployment and analysis. Second, physical-device latency evidence showing 14-millisecond inference on the A17 Pro. Third, an honest status tracking system that prevents overstatement. Fourth, infrastructure that is ready for stronger models and larger datasets without architectural changes."
+**Say**: "Despite the limitations, we make four contributions. First, a fully reproducible end-to-end pipeline from data curation through deployment and analysis. Second, physical-device latency evidence showing 14.0-14.5ms inference across two model generations on the A17 Pro, confirming that scaling from 24 to 128 classes has negligible latency cost. Third, an honest status tracking system with model metadata sidecars that prevents overstatement. Fourth, infrastructure that is ready for stronger models and larger datasets without architectural changes."
 
 **Emphasis**: Contributions are infrastructure and methodology, not accuracy claims.
 
@@ -146,7 +146,7 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## Slide 17: Next Steps (45 seconds)
 
-**Say**: "Going forward, we plan to scale the dataset to at least 200 screenshots and 500 QA pairs, train a stronger model such as a LoRA-adapted vision-language model, collect Instruments traces for memory and energy, build the knowledge graph for KG-guided selection, and prepare the paper for submission."
+**Say**: "Going forward, we plan to re-run the selection sweeps and learning curves with dataset v2's 452 examples, train a stronger model such as a LoRA-adapted vision-language model to close the quality gap, collect Instruments traces for memory and energy, build the knowledge graph for KG-guided selection, and prepare the paper for submission."
 
 **Transition**: "With that, we're happy to take questions."
 
@@ -162,19 +162,19 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## "Why is the EM so low?"
 
-**Honest answer**: Two factors. The dataset has only 52 examples with 24 answer classes -- that is roughly 2 examples per class on average, which is not enough for generalization. The model is a 40-thousand-parameter network trained from scratch with no pretrained weights. Both the data scale and the model capacity need to increase.
+**Honest answer**: With v1, we have improved from 10% to 27.5% test EM by scaling from 52 examples (24 classes) to 452 examples (128 classes). But 27.5% on 128 classes is still far from the 70% target. The v1 model is a 47-thousand-parameter network trained from scratch with no pretrained weights -- it needs pretrained visual features to go further. Both continued data scaling and a stronger model architecture are needed.
 
-**Do not say**: "It's just a baseline." Instead say: "The current model validates the pipeline. Reaching 70% EM requires a larger dataset and a stronger model, both of which the pipeline is designed to support."
+**Do not say**: "It's just a baseline." Instead say: "v1 shows meaningful improvement -- 2.75x over v0 -- but reaching 70% EM requires a model with pretrained visual features, such as a LoRA-adapted vision-language model, which the pipeline is designed to support."
 
 ## "Is 14ms a meaningful latency result?"
 
-**Honest answer**: Yes, for two reasons. First, it confirms that the Core ML inference path works correctly on physical hardware. Second, it establishes that latency is not the binding constraint -- the 28x margin means we have substantial room to use a larger model before latency becomes a concern. But latency alone does not make the system effective; quality must improve.
+**Honest answer**: Yes, for three reasons. First, it confirms that the Core ML inference path works correctly on physical hardware. Second, the 28x margin means we have substantial room to use a larger model before latency becomes a concern. Third, v1 (128 classes, 47K params) runs at p50=14.5ms versus v0's 14.0ms -- essentially identical -- which confirms that scaling from 24 to 128 classes has negligible latency cost. But latency alone does not make the system effective; quality must improve.
 
 ## "Will you reach 70% EM?"
 
-**Honest answer**: We believe so, but we cannot guarantee it with the current data. Reaching 70% EM will require scaling the dataset to at least 200-500 examples and using a model with pretrained visual features, such as a LoRA-adapted vision-language model. The pipeline is designed to support exactly this progression.
+**Honest answer**: The trend is encouraging -- v1 improved from 10% to 27.5% by scaling data from 52 to 452 examples -- but we still need to nearly triple accuracy. Reaching 70% EM will require a model with pretrained visual features, such as a LoRA-adapted vision-language model, and potentially further dataset expansion. The pipeline is designed to support exactly this progression.
 
-**Do not say**: "Definitely" or "Easily." The honest answer is "the infrastructure supports it, but we need to do the work."
+**Do not say**: "Definitely" or "Easily." The honest answer is "the trend is positive but the gap is still large, and we need to do the work."
 
 ## "What about energy and memory?"
 
@@ -186,8 +186,8 @@ Target duration: ~15 minutes (roughly 45-50 seconds per slide).
 
 ## "How do you know 52 examples is too few?"
 
-**Honest answer**: The learning curves show it. All three selection strategies converge to the same 10% EM, the power-law fits have very low R-squared, and the uncertainty strategy is degenerate. There is no signal to differentiate strategies, which means the dataset is below the threshold where active learning can demonstrate value.
+**Honest answer**: The learning curves from the v0/dataset-v1 regime show it. All three selection strategies converge to the same 10% EM, the power-law fits have very low R-squared, and the uncertainty strategy is degenerate. There is no signal to differentiate strategies. Note: these curves have not yet been re-run with dataset v2's 452 examples -- that re-run is planned and may show a different picture.
 
 ## "Is this publishable?"
 
-**Honest answer**: The infrastructure and methodology are solid. The empirical results are currently negative or partial. For a publication, we need to close the quality gap and complete the energy/memory measurements. The honest status tracking and reproducible pipeline are genuine contributions regardless of the final accuracy numbers.
+**Honest answer**: The infrastructure and methodology are solid. The empirical results show progress (v1's 27.5% is 2.75x over v0's 10%) but are still partial -- the quality gap to 70% remains large, learning curves need re-running with dataset v2, and energy/memory measurements are outstanding. For a publication, we need to close the quality gap and complete those measurements. The honest status tracking, model metadata sidecars, and reproducible pipeline are genuine contributions regardless of the final accuracy numbers.

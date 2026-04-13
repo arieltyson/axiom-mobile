@@ -33,15 +33,15 @@ Demonstrate the AXIOM-Mobile end-to-end pipeline: a user imports a screenshot, a
 
 **[3] Ask a question (15s)**
 1. Type a question relevant to the screenshot (e.g., "What app is this?" or "What is shown on screen?")
-2. Point out the model picker showing `tiny_multimodal_v0`
+2. Point out the model picker showing `tiny_multimodal_v1`
 
 **[4] Run inference (15s)**
 1. Tap "Run Inference"
 2. Point out the answer card and latency in the debug metrics
-3. Say: "This is real Core ML inference -- a 96KB model running entirely on-device. The latency you see is wall-clock time including image preprocessing."
+3. Say: "This is real Core ML inference -- a 47K-parameter model running entirely on-device. The latency you see is wall-clock time including image preprocessing. The app uses model metadata sidecars to set confidence thresholds automatically (0.45 for v1)."
 
 **[5] Discuss the model honestly (30s)**
-> "This is a deliberately small 40,000-parameter model trained on only 37 screenshots. It's not accurate -- about 10% exact match -- but it proves the full pipeline works: Python training, Core ML export, on-device inference, and structured benchmarking. The real research question is how many examples we need to reach 70% accuracy under mobile constraints."
+> "This is tiny_multimodal_v1, a 47K-parameter model trained on 382 examples from 152 screenshots across 128 answer classes. It achieves about 27.5% test exact match -- a 2.75x improvement over v0's 10%, but still far from the 70% target. The real research question is how many examples we need to reach 70% accuracy under mobile constraints. Learning curves and selection sweeps are still from the v0/dataset-v1 regime (52 examples) and need to be re-run with dataset v2."
 
 **[6] Show benchmark mode (30s)**
 1. Toggle Benchmark Mode ON
@@ -75,7 +75,7 @@ xcrun devicectl device process launch \
 ```
 
 This automatically:
-1. Selects `tiny_multimodal_v0`
+1. Selects `tiny_multimodal_v1`
 2. Loads a benchmark image (persisted screenshot or synthetic test pattern)
 3. Sets question: "What is shown on screen?"
 4. Runs 50 iterations with real Core ML inference
@@ -104,7 +104,7 @@ xcrun devicectl device process launch \
 ```
 
 This automatically:
-1. Selects `tiny_multimodal_v0`
+1. Selects `tiny_multimodal_v1`
 2. Loads a benchmark image via `BenchmarkInputProvider`
 3. Sets a canonical demo question
 4. Runs **one** inference
@@ -133,29 +133,30 @@ If no real screenshot is available in the Photos library:
 
 ### Safe claims
 - "The pipeline works end-to-end: data curation, training, Core ML export, on-device inference, benchmarking, and statistical analysis."
-- "The model is 96KB -- well under the 100MB constraint."
-- "Simulator latency p50 is about 98ms in Release build."
-- "Physical-device latency on iPhone 15 Pro Max (A17 Pro) is p50=14.0ms -- about 7x faster than simulator and well within the 400ms threshold."
-- "We compare three selection strategies with bootstrap confidence intervals."
+- "v1 achieves 27.5% test EM on 128 classes -- 2.75x improvement over v0 -- but still far from the 70% target."
+- "v1 physical-device latency (p50=14.5ms) is essentially identical to v0 (p50=14.0ms), confirming that scaling from 24 to 128 classes has negligible latency cost."
+- "Dataset v2 contains 452 examples from 152 screenshots across 128 classes."
+- "The app uses model metadata sidecars for per-model confidence thresholds (0.45 for v1)."
+- "We compare three selection strategies with bootstrap confidence intervals (under the v0/dataset-v1 regime)."
 - "The analysis package explicitly marks every result with its status -- simulator-only, partial, or blocked."
 
 ### What NOT to claim
-- Do NOT say the model is accurate ("it achieves ~10% test EM, far below the 70% target")
-- Do NOT present simulator latency as on-device performance (real on-device numbers now exist: p50=14.0ms on iPhone 15 Pro Max -- use those instead)
+- Do NOT say the model is accurate ("v1 achieves ~27.5% test EM, still far below the 70% target")
+- Do NOT present simulator latency as on-device performance (real on-device numbers now exist: v0 p50=14.0ms, v1 p50=14.5ms on iPhone 15 Pro Max -- use those instead)
 - Do NOT claim statistical significance from 3-seed comparisons
-- Do NOT say any selection strategy is better than another (all converge to identical EM)
-- Do NOT claim energy or memory results exist (physical device required)
+- Do NOT say any selection strategy is better than another (learning curves/selection sweeps are still from v0/dataset-v1 regime with 52 examples)
+- Do NOT claim energy or memory results exist (physical device Instruments traces required)
 
 ## Explaining Simulator vs Physical Device
 
 If asked about the distinction:
 
-> "iOS Simulator runs on the Mac CPU -- it doesn't have the Neural Processing Unit or real thermal management that iPhones have. We've now profiled on a real iPhone 15 Pro Max and see p50=14ms versus 98ms on Simulator -- about 7x faster on real hardware. The Simulator is useful for pipeline validation, but the physical-device numbers are what we report. Energy and memory Instruments traces are still outstanding."
+> "iOS Simulator runs on the Mac CPU -- it doesn't have the Neural Processing Unit or real thermal management that iPhones have. We've profiled both v0 and v1 on a real iPhone 15 Pro Max: v0 p50=14.0ms, v1 p50=14.5ms -- essentially identical, and about 7x faster than the Simulator's ~98ms. The Simulator is useful for pipeline validation, but the physical-device numbers are what we report. Energy and memory Instruments traces are still outstanding."
 
 ## Demo Checklist
 
 - [ ] App builds and runs
-- [ ] Model picker shows `tiny_multimodal_v0`
+- [ ] Model picker shows `tiny_multimodal_v1`
 - [ ] Photo library has prepared screenshots (or use demo mode)
 - [ ] Inference runs and shows answer + latency
 - [ ] Benchmark mode runs and shows summary statistics

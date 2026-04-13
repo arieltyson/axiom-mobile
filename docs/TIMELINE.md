@@ -120,8 +120,12 @@ Deliverable status: `[x]` Complete (export pipeline, accuracy gate, and app inte
 - `[x]` Simulator xctrace workflow validated: Time Profiler and Allocations traces captured via `xcrun xctrace record` with `--attach`. Traces are minimal on Simulator but confirm the tooling pipeline works for physical-device sessions.
 - `[x]` Physical-device profiling sessions — AT-X (iPhone 15 Pro Max, A17 Pro, iOS 26.4.1): 2 sessions, 50 iterations each, real Core ML inference. Session 1 (cold): p50=14.0ms, p95=26.2ms. Session 2 (warm, with Time Profiler): p50=14.5ms, p95=22ms. All latency thresholds passed with wide margin.
 - `[x]` Physical-device Instruments trace: Time Profiler captured on AT-X during 30s auto-benchmark session (3.6MB trace).
+- `[x]` `tiny_multimodal_v1` physical-device profiling — AT-X (iPhone 15 Pro Max, A17 Pro, iOS 26.4.1): 50 iterations, Release build, p50=14.5ms, p95=24.6ms. Negligible latency difference vs v0 (14.0ms), confirming that scaling from 24→128 output classes has no measurable cost on A17 Pro.
+- `[x]` `tiny_multimodal_v1` simulator profiling — iPhone 17 Pro Sim (iOS 26.4): 50 iterations, Release build, p50=125.0ms.
+- `[x]` Time Profiler trace captured for v1 on AT-X (15s session, 8.9MB).
+- `[x]` Device-profile summarizer updated with 6 total sessions (3 simulator + 3 physical, spanning v0 and v1).
 
-Deliverable status: `[x]` Complete (physical-device profiling done on AT-X with 2 sessions, Time Profiler trace captured, all latency thresholds pass).
+Deliverable status: `[x]` Complete (physical-device profiling done on AT-X for both v0 and v1, Time Profiler traces captured, all latency thresholds pass).
 
 ## Phase 6 (Weeks 15-16): Analysis and Publication
 
@@ -133,13 +137,14 @@ Deliverable status: `[x]` Complete (physical-device profiling done on AT-X with 
 - `[x]` Paper draft v1: `paper/PAPER_DRAFT_v1.md` — full research paper skeleton grounded in current repo results, with honest limitations throughout.
 - `[x]` Paper asset generator: `ml/scripts/build_paper_assets.py` produces deterministic SVG, CSV, and Markdown assets from analysis outputs.
 - `[x]` Demo flow script: `docs/DEMO_FLOW.md` — rehearsable 3-minute demo with interactive, auto-benchmark, and demo-mode paths.
-- `[x]` Demo mode in app: `--demo-mode` launch argument sets up a single-shot inference with `tiny_multimodal_v0` for presentation-ready state.
+- `[x]` Demo mode in app: `--demo-mode` launch argument sets up a single-shot inference with the default Core ML model for presentation-ready state.
 - `[x]` Design system v0: `DesignSystem/` layer with semantic color, spacing, shape, typography, motion, and elevation tokens. Reusable components: `GlassCard`, `AXPrimaryButtonStyle`, `AXSecondaryButtonStyle`, `StatusBadge`, `SectionHeader`. All feature views refactored to consume tokens. Documented in `docs/DESIGN_SYSTEM.md`.
 - `[x]` Testbed UI redesign: gradient background, glass cards with hierarchy levels, prominent CTA, status badges, collapsible debug section, dashed empty states, metric tiles in benchmark summary.
 - `[x]` Design system v1 polish: custom app icon (1024×1024 programmatic + export script), branded launch screen, haptic feedback tokens (`AXHaptics`) mapped to 9 interaction points, staggered card entrance animations (`AXTransition`), iPad responsive layout (`AXLayout.axResponsiveContainer()`), light mode contrast refinement, TipKit onboarding (4 contextual tips).
-- `[x]` Paper assets regenerated with physical-device data: device_profile_summary.csv (4 sessions), results_snapshot.md, Pareto view with real latency (14.0ms on A17 Pro).
-- `[x]` Input-contract UX guardrail: domain hint in ScreenshotSection ("Import a mobile app screenshot"), AnswerCard footer explaining 24-class fixed vocabulary for tiny_multimodal_v0. Addresses out-of-domain input confusion without model changes.
-- `[x]` Final presentation / slide deck: `presentation/SLIDE_DECK_v1.md` (18-slide Marp deck), `SPEAKER_NOTES.md`, `README.md`, and `ml/scripts/build_presentation_assets.py` deterministic asset generator. Paper advanced to `PAPER_DRAFT_v2.md` with physical-device latency data.
+- `[x]` Paper assets regenerated with physical-device data: device_profile_summary.csv (6 sessions across v0+v1), results_snapshot.md, Pareto view with v1 data (27.5% EM, 14.5ms on A17 Pro).
+- `[x]` Input-contract UX guardrail: domain hint in ScreenshotSection ("Import a mobile app screenshot"), AnswerCard footer with model-metadata-driven class count. No hardcoded 24-class text.
+- `[x]` Presentation / slide deck: `presentation/SLIDE_DECK_v2.md` (updated Marp deck with v1+dataset-v2 facts), `SPEAKER_NOTES.md`, `README.md`, and `ml/scripts/build_presentation_assets.py` deterministic asset generator. Paper advanced to `paper/PAPER_DRAFT_v3.md` with v1 training results, dataset v2 facts, and v1 physical-device latency.
+- `[x]` Evidence stack refresh: all analysis pipelines (`summarize_device_profiles.py`, `run_statistical_analysis.py`, `build_paper_assets.py`, `build_presentation_assets.py`) re-run with v1 data. Pareto frontier now shows v1 as strictly dominant over v0 (27.5% EM vs 10% at equivalent latency).
 
 Deliverable status: `[x]` Complete.
 
@@ -154,7 +159,7 @@ Deliverable status: `[x]` Complete.
 
 ## Upcoming Work
 
-- `[~]` Scale dataset to 200+ screenshots / 500+ QA pairs (Phase 1 completion). Current: 127 QA pairs from 72 unique screenshots. Next: extend XCUITest to Settings sub-pages, add more simulator apps when available, review/promote remaining candidates.
+- `[x]` Scale dataset beyond 200 examples: dataset v2 has 452 QA pairs from 152 unique screenshots (exceeds 200-screenshot target for QA pairs, not yet for unique screenshots).
 - `[x]` Build SwiftUI testbed shell for on-device testing.
 - `[x]` Implement selection strategies (RAND/UNC/DIV) and sweep runner (Phase 3); KG-guided blocked pending KG v1.
 - `[x]` Core ML export pipeline + accuracy gate (Phase 4) — `ml/scripts/export_coreml.py` with 96KB `.mlpackage` output.

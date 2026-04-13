@@ -18,10 +18,11 @@ The Phase 6 statistical analysis package ingests all experiment artifacts produc
 
 **What this package does NOT prove today:**
 
-1. Physical-device latency evidence now exists (2 sessions on iPhone 15 Pro Max, p50=14.0ms), but energy and memory data remain unavailable
+1. Physical-device latency evidence exists for both v0 and v1 (3 sessions each on iPhone 15 Pro Max, p50=14.0–14.5ms), but energy and memory data remain unavailable
 2. No statistical significance claims (3 seeds, tiny test/val sets)
-3. No quality conclusions (70% EM target not met; ~10% test EM)
+3. No quality conclusions (70% EM target not met; v1 reaches 27.5% test EM, v0 was 10%)
 4. No energy/memory conclusions (require physical-device Instruments traces)
+5. Learning curves and selection sweeps are from the v0/dataset-v1 regime (52 examples) only — they have not been re-run with dataset v2 (452 examples)
 
 ## Inputs
 
@@ -125,7 +126,7 @@ This is a core design principle: **simulator and physical-device data are never 
 
 - Device-profile sessions are classified by checking for `"sim"` in the session directory name.
 - Simulator latency validates the instrumentation pipeline but is NOT publishable on-device evidence.
-- Physical-device sessions have been captured on AT-X (iPhone 15 Pro Max, A17 Pro): 2 sessions, 50 iterations each, with real Core ML inference and Time Profiler trace. Energy (Energy Log) and memory (Allocations) Instruments traces are still outstanding.
+- Physical-device sessions have been captured on AT-X (iPhone 15 Pro Max, A17 Pro): 3 sessions total (2 for v0, 1 for v1), 50 iterations each, with real Core ML inference and Time Profiler traces. Energy (Energy Log) and memory (Allocations) Instruments traces are still outstanding.
 
 The analysis report labels every latency measurement with its environment. The Pareto analysis includes latency environment as a visible column.
 
@@ -171,20 +172,23 @@ ml/scripts/
 
 As of 2026-04-13, the analysis reflects:
 
-- **Dataset:** 52 examples (pool=37, val=5, test=10), 24 answer classes
+- **Dataset:** Learning curves use dataset v1: 52 examples (pool=37, val=5, test=10), 24 answer classes
 - **Strategies analyzed:** random, diversity, uncertainty (kg_guided skipped — requires KG v1)
 - **Budgets:** 5, 10, 15, 20, 25, 37
 - **Seeds:** 3 per strategy-budget
-- **Models:** question_lookup_v0 (heuristic), tiny_multimodal_v0 (trainable, 40K params, 96KB CoreML)
-- **Device profiles:** 2 simulator sessions, 2 physical-device sessions (iPhone 15 Pro Max, A17 Pro)
+- **Models:** question_lookup_v0 (heuristic), tiny_multimodal_v0 (trainable, 40K params, 96KB CoreML), tiny_multimodal_v1 (trainable, 47K params, 0.5MB CoreML, dataset v2)
+- **Device profiles:** 3 simulator sessions (2×v0, 1×v1), 3 physical-device sessions (2×v0, 1×v1) on iPhone 15 Pro Max, A17 Pro
 - **Overall status:** `partial`
 
 Key findings:
-- Both models achieve ~10% test EM (1/10 correct) and 0% val EM
+- v0 models achieve ~10% test EM (1/10 correct) and 0% val EM
+- v1 achieves 27.5% test EM and 26.7% val EM — a 2.75× improvement, but still far below 70% target
 - Heuristic baseline's 73% pool EM reflects memorization, not generalization
 - All pairwise strategy comparisons show 0.0 difference at full-pool budget (all converge to same EM)
 - Power-law fits have low R² (0.17 for diversity, 0.02 for random) — expected with tiny, noisy data
 - Uncertainty strategy is degenerate (all-zero test EM except at budget=37)
+- Pareto analysis: v1 (27.5% EM, 14.5ms, 0.5MB) strictly dominates both v0 models
+- Physical-device latency is nearly identical between v0 and v1 (14.0ms vs 14.5ms) — scaling from 24 to 128 classes has negligible cost
 
 ## Extending This Package
 

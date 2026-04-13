@@ -73,7 +73,7 @@
     "reason": "3 pairwise comparisons at budget=37 with 3 strategies. Small sample sizes (3 seeds); bootstrap CIs are provided but may be unreliable.",
     "status": "partial"
   },
-  "created_at_utc": "2026-04-13T06:42:34Z",
+  "created_at_utc": "2026-04-13T09:37:49Z",
   "device_profiles": {
     "energy_reason": "Energy Log requires physical device. Instruments reports relative levels (0-20 scale), not battery %/hr. Not available from Simulator.",
     "energy_status": "physical_device_required",
@@ -196,9 +196,67 @@
             "threshold": "< 100 MB"
           }
         ]
+      },
+      {
+        "bootstrap_ci_p50": null,
+        "environment": "physical_device",
+        "max_ms": 209,
+        "mean_ms": 21.3,
+        "min_ms": 11,
+        "model_id": "tiny_multimodal_v1",
+        "n_sessions": 1,
+        "n_total_records": 50,
+        "p50_ms": 14.5,
+        "p95_ms": 24.6,
+        "reason": "Physical-device measurement.",
+        "status": "complete",
+        "threshold_evaluations": [
+          {
+            "measured_value": "14.5 ms",
+            "metric_name": "latency_p50",
+            "reason": "p50 latency meets threshold.",
+            "status": "pass",
+            "threshold": "<= 400 ms"
+          },
+          {
+            "measured_value": "24.6 ms",
+            "metric_name": "latency_p95",
+            "reason": "p95 latency meets threshold.",
+            "status": "pass",
+            "threshold": "<= 600 ms"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "peak_memory",
+            "reason": "No trace_metrics.json with peak_memory_mb. Run Instruments Allocations template.",
+            "status": "unavailable",
+            "threshold": "< 500 MB"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "energy",
+            "reason": "No trace_metrics.json with energy data. Run Instruments Energy Log on physical device.",
+            "status": "unavailable",
+            "threshold": "< 5.0% battery/hr"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "exact_match",
+            "reason": "Quality metrics (EM, BLEU, hallucination rate) are not captured in device benchmark sessions. These require offline evaluation against ground-truth labels from data/manifests/.",
+            "status": "unavailable",
+            "threshold": ">= 70% EM"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "model_size",
+            "reason": "Model size is not captured in device benchmark sessions. Requires measuring .mlpackage size after Core ML conversion (Phase 4).",
+            "status": "unavailable",
+            "threshold": "< 100 MB"
+          }
+        ]
       }
     ],
-    "reason": "2 simulator session(s), 2 physical-device session(s).",
+    "reason": "3 simulator session(s), 3 physical-device session(s).",
     "simulator": [
       {
         "bootstrap_ci_p50": null,
@@ -281,6 +339,64 @@
           },
           {
             "measured_value": "112.8 ms",
+            "metric_name": "latency_p95",
+            "reason": "p95 latency meets threshold.",
+            "status": "pass",
+            "threshold": "<= 600 ms"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "peak_memory",
+            "reason": "No trace_metrics.json with peak_memory_mb. Run Instruments Allocations template.",
+            "status": "unavailable",
+            "threshold": "< 500 MB"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "energy",
+            "reason": "No trace_metrics.json with energy data. Run Instruments Energy Log on physical device.",
+            "status": "unavailable",
+            "threshold": "< 5.0% battery/hr"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "exact_match",
+            "reason": "Quality metrics (EM, BLEU, hallucination rate) are not captured in device benchmark sessions. These require offline evaluation against ground-truth labels from data/manifests/.",
+            "status": "unavailable",
+            "threshold": ">= 70% EM"
+          },
+          {
+            "measured_value": null,
+            "metric_name": "model_size",
+            "reason": "Model size is not captured in device benchmark sessions. Requires measuring .mlpackage size after Core ML conversion (Phase 4).",
+            "status": "unavailable",
+            "threshold": "< 100 MB"
+          }
+        ]
+      },
+      {
+        "bootstrap_ci_p50": null,
+        "environment": "simulator",
+        "max_ms": 709,
+        "mean_ms": 148.1,
+        "min_ms": 103,
+        "model_id": "tiny_multimodal_v1",
+        "n_sessions": 1,
+        "n_total_records": 50,
+        "p50_ms": 125.0,
+        "p95_ms": 229.5,
+        "reason": "Simulator latency \u2014 not valid for on-device performance conclusions. No NPU, no real thermal behavior.",
+        "status": "simulator_only",
+        "threshold_evaluations": [
+          {
+            "measured_value": "125.0 ms",
+            "metric_name": "latency_p50",
+            "reason": "p50 latency meets threshold.",
+            "status": "pass",
+            "threshold": "<= 400 ms"
+          },
+          {
+            "measured_value": "229.5 ms",
             "metric_name": "latency_p95",
             "reason": "p95 latency meets threshold.",
             "status": "pass",
@@ -687,9 +803,20 @@
         "quality_value": 0.1,
         "reason": "",
         "status": "complete"
+      },
+      {
+        "artifact_size_mb": 0.5,
+        "is_pareto_optimal": true,
+        "latency_environment": "physical_device",
+        "latency_p50_ms": 14.5,
+        "model_id": "tiny_multimodal_v1",
+        "quality_metric": "test_em",
+        "quality_value": 0.275,
+        "reason": "",
+        "status": "complete"
       }
     ],
-    "reason": "2 model(s) in Pareto view.",
+    "reason": "3 model(s) in Pareto view.",
     "status": "partial"
   },
   "version": "0.1.0"
