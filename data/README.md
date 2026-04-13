@@ -103,3 +103,44 @@ After review passes:
 - move superseded or unusable files into `archive/`
 
 This keeps the research dataset reproducible while preserving the working history.
+
+---
+
+## Automated Dataset Scaling
+
+### Exact-answer promotion (auto_exact)
+
+The screenshot automation harness (`scripts/generate_exact_scenarios.py` + `scripts/capture_screenshots.sh`) can generate examples with deterministic exact answers. These are auto-promoted to `pool.jsonl` via:
+
+```bash
+python3 ml/scripts/index_generated_screenshots.py \
+  --input ~/Datasets/axiom-mobile/generated_screenshots \
+  --promote --start-id <next_id> --auto-promote
+```
+
+Auto-exact answers are only emitted when the scenario state is controlled:
+- Status bar time/battery — set by `xcrun simctl status_bar`
+- Battery charging indicator — set by `--batteryState`
+- Apple Account sign-in state — deterministic on fresh simulator
+- App-specific defaults — verified by visual inspection
+
+### Label status classification
+
+| Status | Meaning | Where it goes |
+|--------|---------|--------------|
+| `auto_exact` | Answer is deterministic and visually verified | Appended to `pool.jsonl` automatically |
+| `needs_review` | Answer hint provided, needs human verification | Stays in `generated_candidates.jsonl` |
+| `needs_labeling` | No answer provided | Stays in `generated_candidates.jsonl` |
+
+### Screenshot naming
+
+Auto-generated screenshots use `gen_XXXX_<scenario>.png` naming during capture. When promoted to manifests, entries use canonical `img_NNN.png` naming (matching `ex_NNN` IDs). The `rename_map.json` file maps capture filenames to manifest filenames for copying to Drive.
+
+### What is NOT auto-promoted
+
+- Toggle states unless the test explicitly controls them
+- Dynamic content (weather, live data, network names)
+- Content requiring scrolling or navigation
+- Any val/test split entries (always manual)
+
+See `docs/SCREENSHOT_AUTOMATION.md` for the full pipeline documentation.

@@ -50,3 +50,5 @@ data/images/
 
 # Generated screenshot candidates (local staging — reviewed entries go to pool/val/test)
 data/manifests/generated_candidates.jsonl
+data/manifests/generated_candidates_review.jsonl
+data/manifests/rename_map.json

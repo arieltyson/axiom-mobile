@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────
-# AXIOM-Mobile — Simulator Screenshot Capture Harness
+# AXIOM-Mobile — Simulator Screenshot Capture Harness v0.2.0
+#
+# v0.2.0: Per-scenario status bar overrides, app termination between
+#         captures, qa_pairs (exact answers) support.
 #
 # Usage:
 #   ./scripts/capture_screenshots.sh                     # default: booted device
@@ -11,8 +14,8 @@
 # Requires: Xcode CLI tools, jq, a booted iOS Simulator
 #
 # Outputs to {output_dir}/:
-#   gen_XXXX.png        — captured screenshots
-#   capture_index.jsonl — one JSON object per capture with full metadata
+#   gen_XXXX_<scenario_id>.png  — captured screenshots
+#   capture_index.jsonl         — one JSON object per capture
 # ──────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -94,18 +97,14 @@ resolve_device() {
     echo "Using simulator: $DEVICE_NAME ($DEVICE_UDID)"
 }
 
-# ── Status Bar Override ───────────────────────────────────────────────
-apply_status_bar() {
-    local time battery_level battery_state wifi_bars cellular_bars operator_name
+# ── Status Bar Helpers ────────────────────────────────────────────────
 
-    time=$(jq -r '.status_bar.time' "$SCENARIOS_FILE")
-    battery_level=$(jq -r '.status_bar.battery_level' "$SCENARIOS_FILE")
-    battery_state=$(jq -r '.status_bar.battery_state' "$SCENARIOS_FILE")
-    wifi_bars=$(jq -r '.status_bar.wifi_bars' "$SCENARIOS_FILE")
-    cellular_bars=$(jq -r '.status_bar.cellular_bars' "$SCENARIOS_FILE")
-    operator_name=$(jq -r '.status_bar.operator_name' "$SCENARIOS_FILE")
+apply_status_bar_values() {
+    # Apply explicit status bar values.
+    # Args: time, battery_level, battery_state, wifi_bars, cellular_bars, operator_name
+    local time="$1" battery_level="$2" battery_state="$3"
+    local wifi_bars="${4:-3}" cellular_bars="${5:-4}" operator_name="${6:-Carrier}"
 
-    echo "Applying deterministic status bar..."
     xcrun simctl status_bar "$DEVICE_UDID" override \
         --time "$time" \
         --batteryState "$battery_state" \
@@ -113,9 +112,42 @@ apply_status_bar() {
         --wifiBars "$wifi_bars" \
         --cellularBars "$cellular_bars" \
         --operatorName "$operator_name" \
-        2>/dev/null || echo "  [warn] status_bar override may not be fully supported on this runtime"
+        2>/dev/null || echo "  [warn] status_bar override may not be fully supported"
+}
 
-    echo "  time=$time battery=$battery_level% wifi=$wifi_bars bars"
+apply_default_status_bar() {
+    local time battery_level battery_state wifi_bars cellular_bars operator_name
+
+    time=$(jq -r '.default_status_bar.time // .status_bar.time // "9:41"' "$SCENARIOS_FILE")
+    battery_level=$(jq -r '.default_status_bar.battery_level // .status_bar.battery_level // 100' "$SCENARIOS_FILE")
+    battery_state=$(jq -r '.default_status_bar.battery_state // .status_bar.battery_state // "charged"' "$SCENARIOS_FILE")
+    wifi_bars=$(jq -r '.default_status_bar.wifi_bars // .status_bar.wifi_bars // 3' "$SCENARIOS_FILE")
+    cellular_bars=$(jq -r '.default_status_bar.cellular_bars // .status_bar.cellular_bars // 4' "$SCENARIOS_FILE")
+    operator_name=$(jq -r '.default_status_bar.operator_name // .status_bar.operator_name // "Carrier"' "$SCENARIOS_FILE")
+
+    echo "Applying default status bar..."
+    apply_status_bar_values "$time" "$battery_level" "$battery_state" "$wifi_bars" "$cellular_bars" "$operator_name"
+    echo "  time=$time battery=$battery_level% ($battery_state)"
+}
+
+apply_scenario_status_bar() {
+    # Apply per-scenario status bar override if present.
+    # Falls back to default values for fields not specified.
+    local scenario_json="$1"
+
+    local has_override
+    has_override=$(echo "$scenario_json" | jq '.status_bar_override != null')
+    if [[ "$has_override" != "true" ]]; then
+        return 0
+    fi
+
+    local sb_time sb_level sb_state
+    sb_time=$(echo "$scenario_json" | jq -r '.status_bar_override.time // "9:41"')
+    sb_level=$(echo "$scenario_json" | jq -r '.status_bar_override.battery_level // 100')
+    sb_state=$(echo "$scenario_json" | jq -r '.status_bar_override.battery_state // "charged"')
+
+    apply_status_bar_values "$sb_time" "$sb_level" "$sb_state"
+    echo "    [sb] time=$sb_time battery=$sb_level% ($sb_state)"
 }
 
 clear_status_bar() {
@@ -148,7 +180,14 @@ capture_scenario() {
         return 0
     fi
 
-    # Launch app or open deep link
+    # ── Per-scenario status bar override ──
+    apply_scenario_status_bar "$scenario_json"
+
+    # ── Terminate app for clean state ──
+    xcrun simctl terminate "$DEVICE_UDID" "$app_bundle" 2>/dev/null || true
+    sleep 0.5
+
+    # ── Launch app or open deep link ──
     if [[ -n "$deep_link" ]]; then
         xcrun simctl openurl "$DEVICE_UDID" "$deep_link" 2>/dev/null || {
             echo "    [warn] Deep link failed: $deep_link — falling back to app launch"
@@ -178,13 +217,16 @@ capture_scenario() {
     file_size=$(stat -f%z "$filepath" 2>/dev/null || echo "0")
     echo "    [ok] $filename ($file_size bytes)"
 
-    # Extract Q&A templates
-    local qa_templates
-    qa_templates=$(echo "$scenario_json" | jq -c '.qa_templates // []')
+    # ── Extract Q&A pairs (v2: qa_pairs, v1 fallback: qa_templates) ──
+    local qa_data
+    qa_data=$(echo "$scenario_json" | jq -c '.qa_pairs // .qa_templates // []')
 
     # Write index entry (JSONL)
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    local sb_override
+    sb_override=$(echo "$scenario_json" | jq -c '.status_bar_override // null')
 
     jq -cn \
         --arg id "gen_${padded_index}" \
@@ -198,10 +240,11 @@ capture_scenario() {
         --arg device_udid "$DEVICE_UDID" \
         --arg batch_id "$BATCH_ID" \
         --arg timestamp "$timestamp" \
-        --arg generator_version "0.1.0" \
+        --arg generator_version "0.2.0" \
         --arg app_bundle "$app_bundle" \
         --arg deep_link "$deep_link" \
-        --argjson qa_templates "$qa_templates" \
+        --argjson qa_pairs "$qa_data" \
+        --argjson status_bar_override "$sb_override" \
         --argjson file_size "$file_size" \
         '{
             id: $id,
@@ -218,7 +261,8 @@ capture_scenario() {
             generator_version: $generator_version,
             app_bundle: $app_bundle,
             deep_link: $deep_link,
-            qa_templates: $qa_templates,
+            qa_pairs: $qa_pairs,
+            status_bar_override: $status_bar_override,
             file_size_bytes: $file_size
         }' >> "$OUTPUT_DIR/capture_index.jsonl"
 
@@ -227,9 +271,9 @@ capture_scenario() {
 
 # ── Main ──────────────────────────────────────────────────────────────
 main() {
-    echo "═══════════════════════════════════════════════════════════"
-    echo "  AXIOM-Mobile Screenshot Capture Harness v0.1.0"
-    echo "═══════════════════════════════════════════════════════════"
+    echo "================================================================"
+    echo "  AXIOM-Mobile Screenshot Capture Harness v0.2.0"
+    echo "================================================================"
     echo ""
 
     # Validate scenarios file
@@ -238,6 +282,10 @@ main() {
         exit 1
     fi
 
+    local version
+    version=$(jq -r '._version // "unknown"' "$SCENARIOS_FILE")
+    echo "Scenarios version: $version"
+
     # Generate batch ID if not provided
     if [[ -z "$BATCH_ID" ]]; then
         BATCH_ID="batch_$(date +%Y%m%d_%H%M%S)"
@@ -245,24 +293,31 @@ main() {
 
     resolve_device
 
-    # Create output directory
+    # Create output directory (clear previous index)
     mkdir -p "$OUTPUT_DIR"
+    rm -f "$OUTPUT_DIR/capture_index.jsonl"
     echo "Output directory: $OUTPUT_DIR"
     echo "Batch ID: $BATCH_ID"
     echo ""
 
-    # Apply deterministic status bar
-    apply_status_bar
+    # Apply default status bar
+    apply_default_status_bar
     echo ""
 
     # Return to home screen before starting
     xcrun simctl spawn "$DEVICE_UDID" launchctl kickstart -k system/com.apple.SpringBoard 2>/dev/null || true
     sleep 2
 
+    # Grant Maps location permission to avoid first-run dialog
+    xcrun simctl privacy "$DEVICE_UDID" grant location com.apple.Maps 2>/dev/null || true
+
     # Read and execute scenarios
     local scenario_count
     scenario_count=$(jq '.scenarios | length' "$SCENARIOS_FILE")
-    echo "Capturing $scenario_count scenarios..."
+    local total_qa
+    total_qa=$(jq '[.scenarios[].qa_pairs // .scenarios[].qa_templates | length] | add // 0' "$SCENARIOS_FILE")
+
+    echo "Capturing $scenario_count scenarios (~$total_qa QA pairs)..."
     echo ""
 
     local ok=0
@@ -279,7 +334,7 @@ main() {
         fi
 
         # Brief pause between scenarios to let animations settle
-        sleep 1
+        sleep 0.5
     done
 
     echo ""
@@ -290,12 +345,12 @@ main() {
 
     # Summary
     echo ""
-    echo "═══════════════════════════════════════════════════════════"
+    echo "================================================================"
     echo "  Capture complete: $ok captured, $skip skipped"
     echo "  Output: $OUTPUT_DIR"
     echo "  Index:  $OUTPUT_DIR/capture_index.jsonl"
     echo "  Batch:  $BATCH_ID"
-    echo "═══════════════════════════════════════════════════════════"
+    echo "================================================================"
 
     if [[ -f "$OUTPUT_DIR/capture_index.jsonl" ]]; then
         local index_lines
@@ -305,9 +360,9 @@ main() {
 
     echo ""
     echo "Next steps:"
-    echo "  1. Review screenshots in $OUTPUT_DIR"
-    echo "  2. Run: python3 ml/scripts/index_generated_screenshots.py --input $OUTPUT_DIR"
-    echo "  3. Review candidates and promote to data/manifests/"
+    echo "  1. python3 ml/scripts/index_generated_screenshots.py --input $OUTPUT_DIR --promote --start-id 53"
+    echo "  2. Review generated_candidates.jsonl — auto_exact entries are ready for promotion"
+    echo "  3. python3 ml/scripts/index_generated_screenshots.py --input $OUTPUT_DIR --promote --start-id 53 --auto-promote"
 }
 
 main "$@"

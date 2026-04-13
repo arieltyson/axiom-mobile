@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""Index and promote generated screenshots into dataset candidate manifests.
+"""Index, promote, and auto-promote generated screenshots into dataset manifests.
 
 Usage:
     # Show summary of a capture batch
     python3 ml/scripts/index_generated_screenshots.py \\
         --input ~/Datasets/axiom-mobile/generated_screenshots
 
-    # Promote reviewed captures to a staging manifest
+    # Promote to staging manifest (all candidates)
     python3 ml/scripts/index_generated_screenshots.py \\
         --input ~/Datasets/axiom-mobile/generated_screenshots \\
         --promote --start-id 53
+
+    # Auto-promote: append exact-answer entries directly to pool.jsonl
+    python3 ml/scripts/index_generated_screenshots.py \\
+        --input ~/Datasets/axiom-mobile/generated_screenshots \\
+        --promote --start-id 53 --auto-promote
 
     # Preview what would be written (dry run)
     python3 ml/scripts/index_generated_screenshots.py \\
@@ -21,6 +26,11 @@ Reads:
 
 Writes (--promote):
     data/manifests/generated_candidates.jsonl — staging manifest for review
+
+Writes (--auto-promote):
+    data/manifests/pool.jsonl — appends auto_exact entries
+    data/manifests/generated_candidates.jsonl — remaining needs_review entries
+    data/manifests/rename_map.json — screenshot rename mapping
 """
 
 from __future__ import annotations
@@ -34,6 +44,7 @@ from typing import Any
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent.parent
+_MANIFESTS_DIR = _PROJECT_ROOT / "data" / "manifests"
 
 
 def load_capture_index(input_dir: Path) -> list[dict[str, Any]]:
@@ -71,9 +82,26 @@ def summarize(entries: list[dict[str, Any]]) -> None:
     for family, count in families.most_common():
         print(f"  {family}: {count}")
 
-    # Q&A template counts
-    total_qa = sum(len(e.get("qa_templates", [])) for e in entries)
-    print(f"\nTotal Q&A templates: {total_qa}")
+    # Q&A pair counts (v2: qa_pairs, v1 fallback: qa_templates)
+    total_qa = 0
+    total_exact = 0
+    total_review = 0
+    total_labeling = 0
+    for e in entries:
+        qa_list = e.get("qa_pairs", e.get("qa_templates", []))
+        for qa in qa_list:
+            total_qa += 1
+            if qa.get("answer") and not qa.get("answer_hint"):
+                total_exact += 1
+            elif qa.get("answer_hint"):
+                total_review += 1
+            else:
+                total_labeling += 1
+
+    print(f"\nTotal Q&A pairs: {total_qa}")
+    print(f"  auto_exact:    {total_exact}")
+    print(f"  needs_review:  {total_review}")
+    print(f"  needs_labeling: {total_labeling}")
     print(f"Average Q&A per screenshot: {total_qa / len(entries):.1f}")
 
     # Sources
@@ -97,30 +125,56 @@ def summarize(entries: list[dict[str, Any]]) -> None:
     print()
 
 
+def _classify_qa(qa: dict[str, Any]) -> tuple[str, str]:
+    """Classify a QA pair and return (answer, status).
+
+    Returns:
+        (answer_text, status) where status is auto_exact/needs_review/needs_labeling
+    """
+    answer = qa.get("answer")
+    answer_hint = qa.get("answer_hint")
+
+    if answer and isinstance(answer, str) and answer.strip():
+        # Exact answer provided — auto-promotable
+        return answer.strip(), "auto_exact"
+    elif answer_hint and isinstance(answer_hint, str) and answer_hint.strip():
+        # Hint only — needs human review to fill exact answer
+        return answer_hint.strip(), "needs_review"
+    else:
+        return "[NEEDS LABELING]", "needs_labeling"
+
+
 def promote_to_candidates(
     entries: list[dict[str, Any]],
     start_id: int,
     dry_run: bool = False,
+    auto_promote: bool = False,
 ) -> Path:
-    """Expand Q&A templates into dataset-compatible candidate entries.
+    """Expand Q&A pairs into dataset-compatible candidate entries.
 
-    Each capture entry with N Q&A templates produces N candidate rows,
-    each with a unique example ID and the same image filename.
+    Each capture entry with N Q&A pairs produces N candidate rows,
+    each with a unique example ID and canonical img_NNN.png filename.
+
+    When auto_promote=True, entries with status=auto_exact are appended
+    directly to pool.jsonl (with _ metadata fields stripped).
     """
-    candidates: list[dict[str, str | int]] = []
+    candidates: list[dict[str, Any]] = []
+    rename_map: dict[str, list[str]] = {}  # original_filename -> [img_NNN.png, ...]
     current_id = start_id
 
     for entry in entries:
-        image_filename = entry.get("image_filename", "")
-        qa_templates = entry.get("qa_templates", [])
+        original_filename = entry.get("image_filename", "")
+        # v2: qa_pairs, v1 fallback: qa_templates
+        qa_list = entry.get("qa_pairs", entry.get("qa_templates", []))
         notes = entry.get("notes", "")
         scenario_id = entry.get("scenario_id", "")
 
-        if not qa_templates:
-            # Create a placeholder entry for screenshots without templates
+        if not qa_list:
+            # Screenshot with no QA — create placeholder
+            canonical = f"img_{current_id:03d}.png"
             candidates.append({
                 "id": f"ex_{current_id:03d}",
-                "image_filename": image_filename,
+                "image_filename": canonical,
                 "question": "[NEEDS LABELING]",
                 "answer": "[NEEDS LABELING]",
                 "difficulty": 1,
@@ -128,65 +182,109 @@ def promote_to_candidates(
                 "_status": "needs_labeling",
                 "_source": "simulator_generated",
                 "_scenario_id": scenario_id,
+                "_original_filename": original_filename,
             })
+            rename_map.setdefault(original_filename, []).append(canonical)
             current_id += 1
             continue
 
-        for qa in qa_templates:
+        for qa in qa_list:
+            answer_text, status = _classify_qa(qa)
             question = qa.get("question", "[NEEDS LABELING]")
-            answer_hint = qa.get("answer_hint", "[NEEDS LABELING]")
             difficulty = qa.get("difficulty", 1)
+            canonical = f"img_{current_id:03d}.png"
 
             candidates.append({
                 "id": f"ex_{current_id:03d}",
-                "image_filename": image_filename,
+                "image_filename": canonical,
                 "question": question,
-                "answer": answer_hint,
+                "answer": answer_text,
                 "difficulty": difficulty,
                 "notes": f"{notes} (auto-captured: {scenario_id})",
-                "_status": "needs_review",
+                "_status": status,
                 "_source": "simulator_generated",
                 "_scenario_id": scenario_id,
+                "_original_filename": original_filename,
             })
+            rename_map.setdefault(original_filename, []).append(canonical)
             current_id += 1
 
-    output_path = _PROJECT_ROOT / "data" / "manifests" / "generated_candidates.jsonl"
+    # Status breakdown
+    auto_exact = [c for c in candidates if c["_status"] == "auto_exact"]
+    needs_review = [c for c in candidates if c["_status"] == "needs_review"]
+    needs_labeling = [c for c in candidates if c["_status"] == "needs_labeling"]
 
     print(f"\nCandidate generation:")
     print(f"  Screenshots: {len(entries)}")
     print(f"  Candidate entries: {len(candidates)}")
     print(f"  ID range: ex_{start_id:03d} — ex_{current_id - 1:03d}")
-    print(f"  Output: {output_path.relative_to(_PROJECT_ROOT)}")
+    print(f"\n  Status breakdown:")
+    print(f"    auto_exact:    {len(auto_exact)} (ready for pool.jsonl)")
+    print(f"    needs_review:  {len(needs_review)}")
+    print(f"    needs_labeling: {len(needs_labeling)}")
 
     if dry_run:
-        print("\n  [dry-run] No files written.")
-        print("\n  Sample entries:")
-        for c in candidates[:3]:
-            print(f"    {json.dumps(c)}")
-        return output_path
+        print(f"\n  [dry-run] No files written.")
+        print(f"\n  Sample auto_exact entries:")
+        for c in auto_exact[:3]:
+            clean = {k: v for k, v in c.items() if not k.startswith("_")}
+            print(f"    {json.dumps(clean)}")
+        return _MANIFESTS_DIR / "generated_candidates.jsonl"
 
-    # Write staging manifest
-    with open(output_path, "w") as f:
+    # Write all candidates to staging manifest
+    candidates_path = _MANIFESTS_DIR / "generated_candidates.jsonl"
+    with open(candidates_path, "w") as f:
         for candidate in candidates:
             f.write(json.dumps(candidate) + "\n")
+    print(f"\n  [ok] Wrote {len(candidates)} candidates to {candidates_path.name}")
 
-    print(f"  [ok] Wrote {len(candidates)} candidates")
+    # Write rename map
+    rename_map_path = _MANIFESTS_DIR / "rename_map.json"
+    with open(rename_map_path, "w") as f:
+        json.dump(rename_map, f, indent=2)
+        f.write("\n")
+    print(f"  [ok] Wrote rename map ({len(rename_map)} source files) to {rename_map_path.name}")
 
-    # Validation summary
-    needs_labeling = sum(1 for c in candidates if c.get("_status") == "needs_labeling")
-    needs_review = sum(1 for c in candidates if c.get("_status") == "needs_review")
-    print(f"\n  Status breakdown:")
-    print(f"    needs_review:   {needs_review}")
-    print(f"    needs_labeling: {needs_labeling}")
+    # Auto-promote: append auto_exact entries to pool.jsonl
+    if auto_promote and auto_exact:
+        pool_path = _MANIFESTS_DIR / "pool.jsonl"
+        with open(pool_path, "a") as f:
+            for c in auto_exact:
+                # Strip _ metadata fields for the clean manifest entry
+                clean = {k: v for k, v in c.items() if not k.startswith("_")}
+                f.write(json.dumps(clean) + "\n")
+        print(f"\n  [auto-promote] Appended {len(auto_exact)} entries to pool.jsonl")
+        print(f"  pool.jsonl now has entries up to ex_{current_id - 1:03d}")
+
+        # Write needs_review entries separately for human review
+        if needs_review or needs_labeling:
+            review_path = _MANIFESTS_DIR / "generated_candidates_review.jsonl"
+            with open(review_path, "w") as f:
+                for c in needs_review + needs_labeling:
+                    f.write(json.dumps(c) + "\n")
+            print(f"  [ok] Wrote {len(needs_review) + len(needs_labeling)} review entries to {review_path.name}")
+
+    print(f"\n  Rename map: copy screenshots to screenshots_v1/ with new names:")
+    shown = 0
+    for src, dests in list(rename_map.items())[:3]:
+        print(f"    {src} -> {', '.join(dests[:3])}{'...' if len(dests) > 3 else ''}")
+        shown += 1
+    if len(rename_map) > shown:
+        print(f"    ... and {len(rename_map) - shown} more source files")
 
     print(f"\n  Next steps:")
-    print(f"    1. Review screenshots in the capture directory")
-    print(f"    2. Edit {output_path.name}: fix answer_hint values to exact answers")
-    print(f"    3. Remove _ prefixed fields and move approved rows to pool/val/test")
-    print(f"    4. Run: python3 ml/scripts/inspect_dataset.py")
-    print(f"    5. Run: python3 ml/scripts/annotation_qc.py")
+    if auto_promote:
+        print(f"    1. Copy screenshots using rename_map.json to screenshots_v1/ in Drive")
+        print(f"    2. Run: python3 ml/scripts/inspect_dataset.py")
+        print(f"    3. Run: python3 ml/scripts/annotation_qc.py")
+    else:
+        print(f"    1. Review {candidates_path.name}")
+        print(f"    2. Fix answer values (replace hints with exact answers)")
+        print(f"    3. Remove _ prefixed fields and move approved rows to pool/val/test")
+        print(f"    4. Run: python3 ml/scripts/inspect_dataset.py")
+        print(f"    5. Run: python3 ml/scripts/annotation_qc.py")
 
-    return output_path
+    return candidates_path
 
 
 def main() -> None:
@@ -205,6 +303,11 @@ def main() -> None:
         help="Generate a staging manifest (generated_candidates.jsonl)",
     )
     parser.add_argument(
+        "--auto-promote",
+        action="store_true",
+        help="Append auto_exact entries directly to pool.jsonl",
+    )
+    parser.add_argument(
         "--start-id",
         type=int,
         default=53,
@@ -217,6 +320,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    if args.auto_promote and not args.promote:
+        args.promote = True
+
     entries = load_capture_index(args.input)
     summarize(entries)
 
@@ -225,6 +331,7 @@ def main() -> None:
             entries,
             start_id=args.start_id,
             dry_run=args.dry_run,
+            auto_promote=args.auto_promote,
         )
 
 

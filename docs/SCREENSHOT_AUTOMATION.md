@@ -1,44 +1,80 @@
 # Screenshot Automation
 
-Simulator-based screenshot capture harness for scaling the AXIOM-Mobile dataset beyond the current 52 manually-collected examples.
+Simulator-based screenshot capture harness for scaling the AXIOM-Mobile dataset beyond manually-collected examples.
+
+## Current Status
+
+- **Dataset**: 127 total examples (pool=112, val=5, test=10)
+- **Auto-generated**: 75 exact-answer examples from 20 screenshots (batch `exact_v2_batch002`)
+- **Available apps on iOS 26 simulator**: Settings, Maps only (Calculator, Clock, Weather, App Store not installed)
+- **Exact-answer coverage**: status bar (time, battery%), charging indicator, Apple Account state, Maps search bar text
+- **iOS 26 note**: Settings main screen no longer shows Airplane Mode, Wi-Fi, or Bluetooth toggles (moved to sub-pages)
 
 ## Why Simulator Automation
 
-The dataset consists entirely of iOS system app screenshots (Settings, Weather, Calculator, Clock, Maps, App Store, Control Center). These apps are available on every iOS Simulator instance. Automating capture removes the manual bottleneck (screenshot → upload → manifest entry) and enables:
+The dataset consists of iOS system app screenshots. Automating capture removes the manual bottleneck and enables:
 
 - **Deterministic status bar** via `xcrun simctl status_bar` (fixed time, battery, signal)
-- **Repeatable scenarios** via deep links and XCUITest navigation
-- **Batch generation** of 10–100+ screenshots per run
-- **Pre-labeled candidates** with Q&A templates from scenario definitions
+- **Repeatable scenarios** with exact answers where state is controlled
+- **Batch generation** of 20+ screenshots per run with 75+ QA pairs
+- **Auto-promotion** of deterministic entries directly to pool.jsonl
 
 What is NOT automated:
-- Final answer labeling (human review required)
-- Quality validation (human review required)
-- Promotion to frozen manifests (deliberate manual step)
-- Control Center / Lock Screen captures (require physical interaction)
+- Final answer labeling for non-deterministic content (human review required)
+- Quality validation for ambiguous screenshots (human review required)
+- Promotion to val/test splits (deliberate manual step)
 
 ## Architecture
 
 ```
 scripts/
-  capture_screenshots.sh     — Shell orchestrator (simctl-based)
-  capture_scenarios.json     — Scenario definitions (apps, deep links, Q&A templates)
+  generate_exact_scenarios.py  — Scenario generator (status bar variants × app screens)
+  capture_scenarios.json       — Generated scenario definitions (do not edit by hand)
+  capture_screenshots.sh       — Shell orchestrator (simctl-based, v0.2.0)
 
 app/AXIOMMobile/AXIOMMobileUITests/
   ScreenshotCaptureTests.swift — XCUITest for fine-grained UI navigation
 
 ml/scripts/
-  index_generated_screenshots.py — Creates candidate manifests from captures
+  index_generated_screenshots.py — Indexes, promotes, and auto-promotes candidates
 ```
 
 ### Two Capture Paths
 
 | Path | Tool | Best For |
 |------|------|----------|
-| Shell script | `simctl launch` + `simctl io screenshot` | Quick batch captures, deep-link scenarios |
-| XCUITest | `XCUIApplication(bundleIdentifier:)` + `XCUIScreen.main.screenshot()` | Navigating within apps (tap Settings rows, scroll) |
+| Shell script | `simctl launch` + `simctl io screenshot` | Batch captures with status bar variants |
+| XCUITest | `XCUIApplication(bundleIdentifier:)` + `XCUIScreen.main.screenshot()` | Navigating within apps (tap rows, scroll, toggle) |
 
 Both paths produce the same output format: PNG files + `capture_index.jsonl`.
+
+## Exact-Answer System (v0.2.1)
+
+### How It Works
+
+The scenario generator (`generate_exact_scenarios.py`) produces scenarios where **every Q&A pair has an exact answer** grounded in deterministic state:
+
+| Answer Source | Example Question | How Answer Is Known |
+|---------------|-----------------|---------------------|
+| Status bar time | "What time is shown?" | Set by `simctl status_bar --time` |
+| Status bar battery | "What battery percentage is shown?" | Set by `simctl status_bar --batteryLevel` |
+| Battery state indicator | "Is the battery charging?" | Set by `simctl status_bar --batteryState` |
+| Simulator state | "Is the user signed into Apple Account?" | Fresh sim = not signed in |
+| App default | "What text is shown in the search bar?" | Maps always shows "Apple Maps" |
+
+### Label Status Classification
+
+| Status | Meaning | Promotion Path |
+|--------|---------|---------------|
+| `auto_exact` | Answer is deterministic and visually verified | Auto-promoted to pool.jsonl |
+| `needs_review` | Answer hint provided, needs human verification | Stays in generated_candidates.jsonl |
+| `needs_labeling` | No answer provided | Stays in generated_candidates.jsonl |
+
+### What Is NOT Auto-Exact
+
+- Toggle states (Airplane Mode, Wi-Fi, Bluetooth) unless the test explicitly sets them
+- Dynamic content (weather, live map data, network names)
+- Content that requires scrolling to verify
 
 ## Quick Start
 
@@ -48,34 +84,52 @@ Both paths produce the same output format: PNG files + `capture_index.jsonl`.
 - `jq` (`brew install jq`)
 - A booted iOS Simulator
 
-### Shell Script (Recommended for First Run)
+### Full Pipeline (Recommended)
 
 ```bash
-# Boot a simulator if none is running
+# 1. Generate scenarios with exact answers
+python3 scripts/generate_exact_scenarios.py
+
+# 2. Boot a simulator if none is running
 xcrun simctl boot "iPhone 17 Pro"
 
-# Run the capture harness
-chmod +x scripts/capture_screenshots.sh
-./scripts/capture_screenshots.sh
+# 3. Run the capture harness
+./scripts/capture_screenshots.sh --batch-id my_batch
 
-# Or with options
+# 4. Preview candidates (dry run)
+python3 ml/scripts/index_generated_screenshots.py \
+  --input ~/Datasets/axiom-mobile/generated_screenshots \
+  --promote --start-id 53 --dry-run
+
+# 5. Auto-promote exact entries to pool.jsonl
+python3 ml/scripts/index_generated_screenshots.py \
+  --input ~/Datasets/axiom-mobile/generated_screenshots \
+  --promote --start-id 53 --auto-promote
+
+# 6. Validate
+python3 ml/scripts/inspect_dataset.py
+python3 ml/scripts/annotation_qc.py
+```
+
+### Shell Script Options
+
+```bash
 ./scripts/capture_screenshots.sh \
   --device "iPhone 17 Pro" \
   --output ~/Datasets/axiom-mobile/batch_001 \
-  --batch-id batch_001
+  --batch-id batch_001 \
+  --scenarios scripts/capture_scenarios.json \
+  --dry-run
 ```
 
 ### XCUITest
 
 ```bash
-# Build and run capture tests
 xcodebuild test \
   -project app/AXIOMMobile/AXIOMMobile.xcodeproj \
   -scheme AXIOMMobileUITests \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -only-testing:AXIOMMobileUITests/ScreenshotCaptureTests
-
-# Screenshots are saved to ~/Datasets/axiom-mobile/xctest_captures/
 ```
 
 ## Output Contract
@@ -84,7 +138,7 @@ xcodebuild test \
 
 Generated PNGs are written to a local directory (default: `~/Datasets/axiom-mobile/generated_screenshots/`). These are **never committed to git**.
 
-Naming: `gen_XXXX_<scenario_id>.png` (shell) or `<scenario_id>.png` (XCUITest)
+Naming: `gen_XXXX_<scenario_id>.png`
 
 ### Capture Index (`capture_index.jsonl`)
 
@@ -93,143 +147,145 @@ One JSON object per captured screenshot:
 ```json
 {
   "id": "gen_0001",
-  "image_filename": "gen_0001_settings_main.png",
-  "scenario_id": "settings_main",
+  "image_filename": "gen_0001_settings_main_sb01.png",
+  "scenario_id": "settings_main_sb01",
   "screen_family": "settings",
-  "description": "Settings app main screen",
-  "notes": "iOS Settings main screen",
+  "description": "Settings main — sb01 (time=9:41, battery=100%, charged)",
+  "notes": "Settings main — iOS 26 layout, status bar sb01",
   "source": "simulator_generated",
   "device_name": "iPhone 17 Pro",
   "device_udid": "5C24F7D6-...",
-  "batch_id": "batch_20260413_120000",
+  "batch_id": "exact_v2_batch002",
   "timestamp": "2026-04-13T12:00:00Z",
-  "generator_version": "0.1.0",
+  "generator_version": "0.2.0",
   "app_bundle": "com.apple.Preferences",
-  "deep_link": null,
-  "qa_templates": [
-    {"question": "Is Airplane Mode on or off?", "answer_hint": "Check toggle", "difficulty": 1}
+  "qa_pairs": [
+    {"question": "What time is shown?", "answer": "9:41", "difficulty": 1},
+    {"question": "What battery percentage is shown?", "answer": "100%", "difficulty": 1},
+    {"question": "Is the battery charging?", "answer": "Yes", "difficulty": 1},
+    {"question": "Is the user signed into Apple Account?", "answer": "No", "difficulty": 1}
   ],
-  "file_size_bytes": 245760
+  "status_bar_override": {"time": "9:41", "battery_level": 100, "battery_state": "charged"},
+  "file_size_bytes": 383635
 }
 ```
 
+### Promotion Artifacts
+
+After `--auto-promote`, the indexer writes:
+
+| File | Contents |
+|------|----------|
+| `data/manifests/generated_candidates.jsonl` | All candidates with `_status` metadata |
+| `data/manifests/rename_map.json` | Screenshot rename mapping (gen_XXXX → img_NNN) |
+| `data/manifests/pool.jsonl` | Auto_exact entries appended (manifest-ready) |
+
 ## Status Bar Normalization
 
-Before capture, the script applies a deterministic status bar via `xcrun simctl status_bar`:
+Before each scenario, the script applies a deterministic status bar via `xcrun simctl status_bar`:
 
-| Property | Value |
-|----------|-------|
-| Time | 9:41 |
-| Battery | 100%, charged |
-| Wi-Fi | 3 bars |
-| Cellular | 4 bars |
-| Operator | "Carrier" |
-
-This ensures status bar content is consistent across captures and doesn't leak real device state.
+Per-scenario overrides are supported (v0.2.0+). The generator creates 15 status bar variants with different times and battery levels for visual diversity.
 
 To clear: `xcrun simctl status_bar <UDID> clear`
 
-## Scenario Definitions
+## Scenario Generation
 
-Scenarios are defined in `scripts/capture_scenarios.json`. Each entry specifies:
+Scenarios are generated by `scripts/generate_exact_scenarios.py` (not hand-written):
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique scenario identifier |
-| `app_bundle` | Bundle ID of the app to launch |
-| `deep_link` | Optional URL to open a specific screen |
-| `wait_seconds` | Time to wait after launch before capture |
-| `screen_family` | Category for grouping (settings, calculator, etc.) |
-| `qa_templates` | Pre-defined question/answer pairs for this screen |
+```bash
+python3 scripts/generate_exact_scenarios.py          # generate
+python3 scripts/generate_exact_scenarios.py --dry-run # preview
+```
+
+Current scenario set (v0.2.1):
+- **15 Settings main variants** × 4 QA pairs = 60 exact entries
+- **5 Maps default variants** × 3 QA pairs = 15 exact entries
+- **Total: 75 exact QA pairs from 20 screenshots**
 
 ### Adding New Scenarios
 
-1. Add an entry to `scripts/capture_scenarios.json`
-2. Test with `--dry-run` to verify parsing
-3. Run the capture to generate the screenshot
-4. Review the output and refine the Q&A templates
+To add new scenario types, modify `generate_exact_scenarios.py`:
 
-For scenarios that require UI navigation (tapping rows, scrolling), add a test method to `ScreenshotCaptureTests.swift` instead.
+1. Add a new `_make_<app>_scenario()` function
+2. Add scenarios to the `generate()` function
+3. Run `python3 scripts/generate_exact_scenarios.py` to regenerate
+4. Test with `--dry-run` on the shell script
+5. Capture and verify visually before promoting
 
 ## Review and Promotion Workflow
 
 ```
+generate_exact_scenarios.py
+        │
+        ▼
+capture_scenarios.json (generated — do not hand-edit)
+        │
+        ▼
 capture_screenshots.sh
         │
         ▼
 ~/Datasets/axiom-mobile/generated_screenshots/
-  ├── gen_0001_settings_main.png
-  ├── gen_0002_settings_wifi.png
+  ├── gen_0001_settings_main_sb01.png
+  ├── gen_0002_settings_main_sb02.png
   ├── ...
   └── capture_index.jsonl
         │
-        ▼  (index + summarize)
-python3 ml/scripts/index_generated_screenshots.py \
-  --input ~/Datasets/axiom-mobile/generated_screenshots
-        │
-        ▼  (promote to staging)
+        ▼  (index + auto-promote)
 python3 ml/scripts/index_generated_screenshots.py \
   --input ~/Datasets/axiom-mobile/generated_screenshots \
-  --promote --start-id 53
+  --promote --start-id 53 --auto-promote
         │
-        ▼
-data/manifests/generated_candidates.jsonl
+        ├── auto_exact entries → pool.jsonl (appended)
+        ├── rename_map.json (gen_XXXX → img_NNN mapping)
+        └── generated_candidates.jsonl (full staging manifest)
         │
-        ▼  (human review: fix answers, remove bad captures)
-        │
-        ▼  (move approved rows to pool.jsonl / val.jsonl / test.jsonl)
-        │
-        ▼  (copy approved PNGs to screenshots_v1/ in Drive)
+        ▼  (copy screenshots to Drive)
+        │   Use rename_map.json to copy gen_XXXX.png → img_NNN.png
+        │   into screenshots_v1/ in Drive
         │
         ▼  (validate)
 python3 ml/scripts/inspect_dataset.py
 python3 ml/scripts/annotation_qc.py
 ```
 
-### Review Checklist
+### What Remains Manual
 
-For each generated candidate:
-1. Open the PNG — does the screenshot show the expected screen?
-2. Does the question make sense for this screenshot?
-3. Is the answer exact and correct? (Replace `answer_hint` with the actual answer)
-4. Remove the `_status`, `_source`, `_scenario_id` metadata fields
-5. Ensure the `image_filename` matches the file in screenshots_v1/
-
-### Promoting to Final Manifests
-
-After review, manually move approved entries from `generated_candidates.jsonl` to the appropriate split manifest (`pool.jsonl`, `val.jsonl`, or `test.jsonl`). Only include the standard schema fields:
-
-```json
-{"id": "ex_053", "image_filename": "img_053.png", "question": "Is Bluetooth on or off?", "answer": "On", "difficulty": 1, "notes": "iOS Bluetooth settings"}
-```
+1. **Visual spot-check**: verify a sample of auto-promoted screenshots look correct
+2. **Screenshot file copies**: copy PNGs to Drive using rename_map.json
+3. **Val/test promotion**: auto-promote only targets pool.jsonl; moving entries to val/test is manual
+4. **Non-deterministic scenarios**: any scenario where the answer isn't controlled requires human review
 
 ## Extending the Harness
 
+### iOS 26 Settings Layout
+
+iOS 26 reorganized the Settings main screen. Connectivity settings (Wi-Fi, Bluetooth, Airplane Mode, Cellular) are no longer visible on the main screen. To capture these:
+
+1. Use XCUITest to navigate to specific sub-pages
+2. Add test methods that tap the relevant rows
+3. Emit exact answers based on what the test navigated to
+
 ### New System Apps
 
-Add a scenario to `capture_scenarios.json` with the app's bundle ID. Find bundle IDs:
+If new apps become available on the simulator runtime:
+
 ```bash
-xcrun simctl listapps booted | grep CFBundleIdentifier
+# Check available apps
+for bundle in com.apple.calculator com.apple.mobiletimer com.apple.weather; do
+    xcrun simctl launch booted "$bundle" 2>&1 | head -1
+done
 ```
-
-### Stateful Captures
-
-For screenshots that require specific UI state (e.g., Bluetooth OFF):
-1. Add an XCUITest method that navigates to the setting and toggles it
-2. Capture after the state change
-3. Include the expected state in the Q&A template
 
 ### Multiple Devices
 
-Run the shell script with different `--device` flags to capture on iPhone, iPad, etc.:
 ```bash
 ./scripts/capture_screenshots.sh --device "iPhone 17 Pro" --batch-id iphone_batch
 ./scripts/capture_screenshots.sh --device "iPad Air 11-inch (M4)" --batch-id ipad_batch
 ```
 
-### Battery/Time Variations
+## Limitations
 
-For dataset diversity, vary the status bar between batches:
-```bash
-xcrun simctl status_bar <UDID> override --batteryLevel 23 --time "11:30"
-```
+- **iOS 26 simulator**: Only Settings and Maps are available (Calculator, Clock, Weather, App Store not installed)
+- **Deep links**: `App-prefs:` URLs do not navigate to sub-pages on iOS 26 — all open Settings main
+- **First-launch artifacts**: Maps may show location permission dialog on first launch; script pre-grants permission
+- **Status bar warnings**: Some `simctl status_bar` calls emit `[warn]` on iOS 26 runtime but still apply correctly
