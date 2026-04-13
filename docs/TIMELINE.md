@@ -119,11 +119,15 @@ Deliverable status: `[~]` In progress (benchmark input hardened, xctrace workflo
 
 ## Phase 6 (Weeks 15-16): Analysis and Publication
 
-- `[ ]` Statistical analysis package (power-law fits, paired tests, Pareto analysis) not present.
+- `[x]` Statistical analysis package: `ml/src/axiom/analysis/` with typed schemas (`schemas.py`) and stdlib-only statistical helpers (`stats.py`). Bootstrap CIs, paired bootstrap comparisons, power-law fitting with degenerate-data guards.
+- `[x]` Analysis runner: `ml/scripts/run_statistical_analysis.py` ingests baselines, sweeps, CoreML exports, and device profiles. Writes JSON, CSV, Markdown, and SVG to `results/analysis/phase6_v0/`.
+- `[x]` Honest status vocabulary: every result carries an explicit status (complete, partial, blocked, insufficient_data, simulator_only, physical_device_required, skipped, degenerate).
+- `[x]` Simulator vs physical-device separation enforced in all device-profile analysis.
+- `[x]` Documentation: `docs/STATISTICAL_ANALYSIS.md` covers methods, inputs, outputs, status vocabulary, and extension points.
 - `[ ]` Paper draft file(s) not present in repo.
 - `[ ]` Demo flow integration and final presentation assets not present.
 
-Deliverable status: `[ ]` Not started in current codebase.
+Deliverable status: `[~]` In progress (statistical analysis package complete; paper draft and demo flow not started).
 
 ## Next Practical Milestones
 
@@ -148,4 +152,5 @@ Deliverable status: `[ ]` Not started in current codebase.
 - `[x]` xctrace profiling workflow validated on Simulator (Time Profiler + Allocations).
 - `[~]` Physical-device profiling run on iPhone hardware (Phase 5) — all tooling ready, blocked on USB device connection.
 - `[ ]` Physical-device Instruments traces: Time Profiler, Allocations, Energy Log (Phase 5).
-- `[ ]` Phase 6: Statistical analysis, paper draft, demo flow.
+- `[x]` Phase 6: Statistical analysis package — bootstrap CIs, paired comparisons, power-law fits, Pareto views, reproducible outputs.
+- `[ ]` Phase 6: Paper draft and demo flow.
