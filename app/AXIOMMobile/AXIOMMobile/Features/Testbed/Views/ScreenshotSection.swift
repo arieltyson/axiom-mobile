@@ -1,11 +1,14 @@
 import PhotosUI
 import SwiftUI
+import TipKit
 
 struct ScreenshotSection: View {
     @Binding var selectedItem: PhotosPickerItem?
     let image: UIImage?
     let onClear: () -> Void
     var onSaveAsBenchmarkInput: (() -> Void)?
+
+    private let screenshotTip = ScreenshotImportTip()
 
     var body: some View {
         GlassCard(.hero) {
@@ -18,7 +21,15 @@ struct ScreenshotSection: View {
                     emptyState
                 }
 
+                TipView(screenshotTip, arrowEdge: .top)
+                    .tipBackground(AXColor.glassFill)
+
                 actionButtons
+            }
+        }
+        .onChange(of: image != nil) { _, hasImage in
+            if hasImage {
+                ScreenshotImportTip.hasImportedScreenshot = true
             }
         }
     }
@@ -49,6 +60,7 @@ struct ScreenshotSection: View {
                 .axShadow(AXElevation.low)
                 .padding(AXSpacing.sm)
             }
+            .transition(AXTransition.resultAppearance)
             .accessibilityLabel(
                 "Selected screenshot, \(Int(image.size.width)) by \(Int(image.size.height)) pixels"
             )

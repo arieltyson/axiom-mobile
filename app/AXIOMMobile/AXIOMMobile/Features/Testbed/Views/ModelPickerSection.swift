@@ -1,7 +1,10 @@
 import SwiftUI
+import TipKit
 
 struct ModelPickerSection: View {
     @Binding var selectedModel: ModelInfo
+
+    private let coreMLTip = CoreMLModelTip()
 
     var body: some View {
         GlassCard {
@@ -30,6 +33,16 @@ struct ModelPickerSection: View {
                     metadataChip(selectedModel.stage)
                     metadataChip(selectedModel.backend)
                 }
+
+                if !selectedModel.isCoreMLReady {
+                    TipView(coreMLTip, arrowEdge: .top)
+                        .tipBackground(AXColor.glassFill)
+                }
+            }
+        }
+        .onChange(of: selectedModel) { _, newModel in
+            if !newModel.isCoreMLReady {
+                CoreMLModelTip.hasSelectedPlaceholder = true
             }
         }
     }

@@ -130,10 +130,11 @@ Deliverable status: `[~]` In progress (benchmark input hardened, xctrace workflo
 - `[x]` Demo mode in app: `--demo-mode` launch argument sets up a single-shot inference with `tiny_multimodal_v0` for presentation-ready state.
 - `[x]` Design system v0: `DesignSystem/` layer with semantic color, spacing, shape, typography, motion, and elevation tokens. Reusable components: `GlassCard`, `AXPrimaryButtonStyle`, `AXSecondaryButtonStyle`, `StatusBadge`, `SectionHeader`. All feature views refactored to consume tokens. Documented in `docs/DESIGN_SYSTEM.md`.
 - `[x]` Testbed UI redesign: gradient background, glass cards with hierarchy levels, prominent CTA, status badges, collapsible debug section, dashed empty states, metric tiles in benchmark summary.
+- `[x]` Design system v1 polish: custom app icon (1024×1024 programmatic + export script), branded launch screen, haptic feedback tokens (`AXHaptics`) mapped to 9 interaction points, staggered card entrance animations (`AXTransition`), iPad responsive layout (`AXLayout.axResponsiveContainer()`), light mode contrast refinement, TipKit onboarding (4 contextual tips).
 - `[ ]` Paper revision with physical-device data (blocked on iPhone connection).
 - `[ ]` Final presentation / slide deck.
 
-Deliverable status: `[~]` In progress (paper draft v1, demo flow, and asset generator complete; physical-device data and final revision remain).
+Deliverable status: `[~]` In progress (paper draft v1, demo flow, asset generator, and design system v1 complete; physical-device data and final revision remain).
 
 ## Next Practical Milestones
 
@@ -160,4 +161,5 @@ Deliverable status: `[~]` In progress (paper draft v1, demo flow, and asset gene
 - `[ ]` Physical-device Instruments traces: Time Profiler, Allocations, Energy Log (Phase 5).
 - `[x]` Phase 6: Statistical analysis package — bootstrap CIs, paired comparisons, power-law fits, Pareto views, reproducible outputs.
 - `[x]` Phase 6: Paper draft v1 + demo flow + asset generator + `--demo-mode` launch argument.
+- `[x]` Phase 6: Design system v1 — app icon, launch screen, haptic refinement, staggered transitions, iPad layout, light mode polish, TipKit onboarding.
 - `[ ]` Phase 6: Paper revision with physical-device data, final presentation.

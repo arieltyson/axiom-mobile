@@ -3,6 +3,8 @@ import SwiftUI
 struct AnswerCard: View {
     let result: InferenceResult
 
+    @State private var appeared = false
+
     var body: some View {
         GlassCard(.hero) {
             VStack(alignment: .leading, spacing: AXSpacing.md) {
@@ -51,7 +53,13 @@ struct AnswerCard: View {
                 }
             }
         }
-        .axShadow(AXElevation.medium)
+        .axShadow(appeared ? AXElevation.medium : AXElevation.none)
+        .scaleEffect(appeared ? 1.0 : 0.97)
+        .onAppear {
+            withAnimation(AXMotion.gentle) {
+                appeared = true
+            }
+        }
         .accessibilityElement(children: .combine)
     }
 
