@@ -1,12 +1,21 @@
 import SwiftUI
+import TipKit
 
 struct TestbedView: View {
     @State private var viewModel = TestbedViewModel()
+    @State private var sectionsAppeared = false
+
+    private let researchContextTip = ResearchContextTip()
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: AXSpacing.sectionGap) {
+
+                    // MARK: - Onboarding Tip
+
+                    TipView(researchContextTip)
+                        .tipBackground(AXColor.glassFill)
 
                     // MARK: - Input Zone (hero)
 
@@ -18,34 +27,44 @@ struct TestbedView: View {
                             viewModel.saveBenchmarkScreenshot()
                         }
                     )
+                    .axStaggeredAppearance(index: 0, isVisible: sectionsAppeared)
 
                     QuestionInputSection(question: $viewModel.question)
+                        .axStaggeredAppearance(
+                            index: 1, isVisible: sectionsAppeared)
 
                     // MARK: - Configuration
 
                     ModelPickerSection(selectedModel: $viewModel.selectedModel)
+                        .axStaggeredAppearance(
+                            index: 2, isVisible: sectionsAppeared)
+                        .sensoryFeedback(
+                            AXHaptics.modelChanged,
+                            trigger: viewModel.selectedModel
+                        )
 
                     BenchmarkConfigSection(
                         enabled: $viewModel.benchmarkEnabled,
                         iterations: $viewModel.benchmarkIterations
                     )
+                    .axStaggeredAppearance(
+                        index: 3, isVisible: sectionsAppeared)
+                    .sensoryFeedback(
+                        AXHaptics.toggleChanged,
+                        trigger: viewModel.benchmarkEnabled
+                    )
 
                     // MARK: - Primary Action
 
                     primaryActionButton
+                        .axStaggeredAppearance(
+                            index: 4, isVisible: sectionsAppeared)
 
                     // MARK: - Output Zone
 
                     if let result = viewModel.result {
                         AnswerCard(result: result)
-                            .transition(
-                                .asymmetric(
-                                    insertion: .opacity.combined(
-                                        with: .scale(scale: 0.97)
-                                    ),
-                                    removal: .opacity
-                                )
-                            )
+                            .transition(AXTransition.resultAppearance)
                     }
 
                     // MARK: - Supporting Info
@@ -56,6 +75,8 @@ struct TestbedView: View {
                         questionLength: viewModel.question.count,
                         result: viewModel.result
                     )
+                    .axStaggeredAppearance(
+                        index: 5, isVisible: sectionsAppeared)
 
                     if !viewModel.benchmarkRecords.isEmpty {
                         BenchmarkSummaryCard(
@@ -71,10 +92,12 @@ struct TestbedView: View {
                             onExport: { viewModel.exportCSV() },
                             onClear: { viewModel.clearBenchmark() }
                         )
+                        .transition(AXTransition.cardEntrance)
                     }
                 }
                 .padding(.horizontal, AXSpacing.pageMargin)
                 .padding(.bottom, AXSpacing.xxl)
+                .axResponsiveContainer()
             }
             .scrollIndicators(.hidden)
             .background { backgroundGradient }
@@ -83,11 +106,33 @@ struct TestbedView: View {
             .onChange(of: viewModel.selectedPhotoItem) { _, _ in
                 Task { await viewModel.loadImage() }
             }
+            .sensoryFeedback(
+                AXHaptics.imageLoaded,
+                trigger: viewModel.screenshotImage != nil
+            )
+            .sensoryFeedback(
+                AXHaptics.inferenceComplete,
+                trigger: viewModel.isRunning
+            ) { oldValue, newValue in
+                oldValue && !newValue
+            }
+            .sensoryFeedback(
+                AXHaptics.exportSuccess,
+                trigger: viewModel.hasExported
+            ) { oldValue, newValue in
+                !oldValue && newValue
+            }
             .task {
                 if viewModel.isAutoBenchmarkRequested {
                     await viewModel.runAutoBenchmark()
                 } else if viewModel.isDemoModeRequested {
                     await viewModel.runDemoMode()
+                }
+            }
+            .onAppear {
+                // Trigger staggered card entrance
+                withAnimation {
+                    sectionsAppeared = true
                 }
             }
             .axAnimation(AXMotion.gentle, value: viewModel.result != nil)
@@ -132,11 +177,6 @@ struct TestbedView: View {
             }
             .buttonStyle(AXPrimaryButtonStyle())
             .disabled(!viewModel.canRun)
-            .sensoryFeedback(.success, trigger: viewModel.isRunning) {
-                oldValue,
-                newValue in
-                oldValue && !newValue
-            }
             .accessibilityLabel(
                 viewModel.benchmarkEnabled
                     ? "Run benchmark with \(viewModel.selectedModel.displayName)"

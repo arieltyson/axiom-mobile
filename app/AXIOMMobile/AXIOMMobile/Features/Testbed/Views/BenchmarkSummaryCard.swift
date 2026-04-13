@@ -38,6 +38,10 @@ struct BenchmarkSummaryCard: View {
                 actionRow
             }
         }
+        .sensoryFeedback(AXHaptics.exportSuccess, trigger: hasExported) {
+            oldValue, newValue in
+            !oldValue && newValue
+        }
         .accessibilityElement(children: .combine)
     }
 
@@ -105,6 +109,10 @@ struct BenchmarkSummaryCard: View {
                 Label("Clear", systemImage: "trash")
             }
             .buttonStyle(AXCompactButtonStyle(role: .destructive))
+            .sensoryFeedback(AXHaptics.destructiveAction, trigger: recordCount) {
+                oldValue, newValue in
+                oldValue > 0 && newValue == 0
+            }
         }
     }
 }

@@ -1,8 +1,11 @@
 import SwiftUI
+import TipKit
 
 struct BenchmarkConfigSection: View {
     @Binding var enabled: Bool
     @Binding var iterations: Int
+
+    private let benchmarkTip = BenchmarkModeTip()
 
     var body: some View {
         GlassCard(.subdued) {
@@ -16,6 +19,11 @@ struct BenchmarkConfigSection: View {
                 }
                 .tint(AXColor.accentPrimary)
 
+                if !enabled {
+                    TipView(benchmarkTip, arrowEdge: .top)
+                        .tipBackground(AXColor.glassFill)
+                }
+
                 if enabled {
                     VStack(alignment: .leading, spacing: AXSpacing.sm) {
                         Stepper(value: $iterations, in: 1...50) {
@@ -28,6 +36,7 @@ struct BenchmarkConfigSection: View {
                                     .foregroundStyle(AXColor.textPrimary)
                             }
                         }
+                        .sensoryFeedback(AXHaptics.tap, trigger: iterations)
 
                         Text(
                             "Runs inference repeatedly and logs latency statistics."
@@ -35,7 +44,7 @@ struct BenchmarkConfigSection: View {
                         .font(AXFont.caption)
                         .foregroundStyle(AXColor.textTertiary)
                     }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(AXTransition.sectionExpand)
                 }
             }
         }

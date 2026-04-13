@@ -12,60 +12,65 @@ enum AXColor {
     // MARK: Accent
 
     /// Primary interactive accent — buttons, links, active controls.
+    /// Light: deeper blue for WCAG AA contrast on white. Dark: bright blue.
     static let accentPrimary = Color(
-        light: .init(red: 0.20, green: 0.40, blue: 0.95),
+        light: .init(red: 0.16, green: 0.35, blue: 0.88),
         dark: .init(red: 0.35, green: 0.55, blue: 1.0)
     )
 
     /// Secondary accent for supporting indicators and highlights.
+    /// Light: richer purple for readability. Dark: soft violet.
     static let accentSecondary = Color(
-        light: .init(red: 0.45, green: 0.30, blue: 0.90),
+        light: .init(red: 0.38, green: 0.25, blue: 0.85),
         dark: .init(red: 0.55, green: 0.45, blue: 1.0)
     )
 
     /// Subtle glow / emphasis tint for elevated surfaces.
     static let accentGlow = Color(
-        light: .init(red: 0.30, green: 0.50, blue: 1.0).opacity(0.15),
+        light: .init(red: 0.30, green: 0.50, blue: 1.0).opacity(0.12),
         dark: .init(red: 0.35, green: 0.55, blue: 1.0).opacity(0.10)
     )
 
     // MARK: Background
 
     /// Canvas / root background.
+    /// Light: warm off-white with slight blue tint. Dark: near-black.
     static let backgroundBase = Color(
-        light: .init(red: 0.95, green: 0.95, blue: 0.97),
+        light: .init(red: 0.96, green: 0.96, blue: 0.98),
         dark: .init(red: 0.04, green: 0.04, blue: 0.06)
     )
 
-    /// Gradient top in dark mode, near-white in light mode.
+    /// Gradient top — subtle warmth in light, deep blue-black in dark.
     static let backgroundGradientTop = Color(
-        light: .init(red: 0.96, green: 0.96, blue: 0.98),
+        light: .init(red: 0.97, green: 0.97, blue: 0.99),
         dark: .init(red: 0.06, green: 0.06, blue: 0.10)
     )
 
-    /// Gradient bottom in dark mode, neutral in light mode.
+    /// Gradient bottom — slight cool shift in light, deepest dark.
     static let backgroundGradientBottom = Color(
-        light: .init(red: 0.93, green: 0.93, blue: 0.95),
+        light: .init(red: 0.94, green: 0.94, blue: 0.96),
         dark: .init(red: 0.02, green: 0.02, blue: 0.04)
     )
 
     // MARK: Glass
 
     /// Fill tint for glass cards (additive in dark, subtractive in light).
+    /// Light: higher opacity for cleaner card surfaces against gradient.
     static let glassFill = Color(
-        light: .init(white: 1.0).opacity(0.70),
+        light: .init(white: 1.0).opacity(0.75),
         dark: .init(white: 1.0).opacity(0.05)
     )
 
     /// Stroke for glass card borders.
+    /// Light: slightly stronger for visible card edges on white.
     static let glassStroke = Color(
-        light: .init(white: 0.0).opacity(0.06),
+        light: .init(white: 0.0).opacity(0.08),
         dark: .init(white: 1.0).opacity(0.08)
     )
 
     /// Highlight edge on glass cards (top or leading).
     static let glassHighlight = Color(
-        light: .init(white: 1.0).opacity(0.90),
+        light: .init(white: 1.0).opacity(0.95),
         dark: .init(white: 1.0).opacity(0.12)
     )
 
@@ -78,8 +83,9 @@ enum AXColor {
     static let textSecondary = Color.secondary
 
     /// Tertiary text — least-important metadata.
+    /// Light: darker for better readability. Dark: soft white.
     static let textTertiary = Color(
-        light: .init(white: 0.0).opacity(0.30),
+        light: .init(white: 0.0).opacity(0.38),
         dark: .init(white: 1.0).opacity(0.35)
     )
 

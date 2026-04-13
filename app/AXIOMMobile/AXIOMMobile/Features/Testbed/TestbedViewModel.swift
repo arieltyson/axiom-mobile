@@ -1,5 +1,6 @@
 import PhotosUI
 import SwiftUI
+import TipKit
 import UIKit
 
 @Observable
@@ -103,6 +104,9 @@ final class TestbedViewModel {
         }
 
         appendRecord(from: newResult, runKind: .single, iterationIndex: 0)
+
+        // Increment tip counter for benchmark mode suggestion.
+        BenchmarkModeTip.singleRunCount += 1
     }
 
     func runBenchmark() async {

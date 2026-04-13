@@ -101,6 +101,47 @@ Shadow presets applied via `.axShadow()`:
 | `high` | Modals, hero CTA |
 | `glow` | Accent-tinted glow for active states |
 
+### Haptics (`AXHaptics`)
+
+Semantic haptic feedback mapping via `SensoryFeedback`:
+
+| Token | Feedback | Usage |
+|-------|----------|-------|
+| `inferenceComplete` | `.success` | Inference finished |
+| `benchmarkComplete` | `.success` | Benchmark batch finished |
+| `exportSuccess` | `.success` | CSV/metadata export |
+| `imageLoaded` | `.selection` | Screenshot imported |
+| `modelChanged` | `.selection` | Model picker selection |
+| `toggleChanged` | `.selection` | Toggle/switch flipped |
+| `destructiveAction` | `.warning` | Clear/delete actions |
+| `error` | `.error` | Error states |
+| `tap` | `.selection` | Lightweight interactive tap |
+
+### Layout (`AXLayout`)
+
+Responsive layout tokens for multi-device support:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `maxContentWidth` | 600 pt | iPad content constraint |
+| `maxReadingWidth` | 540 pt | Text block max width |
+| `minTouchTarget` | 44 pt | Apple HIG minimum |
+
+The `axResponsiveContainer()` modifier centers content within `maxContentWidth` on iPad (regular size class) and is a no-op on iPhone (compact).
+
+### Transitions (`AXTransition`)
+
+Preset transitions that respect Reduce Motion:
+
+| Preset | Effect | Usage |
+|--------|--------|-------|
+| `cardEntrance` | Slide up + scale + fade | New card appearance |
+| `resultAppearance` | Scale from center + fade | Answer card reveal |
+| `sectionExpand` | Slide from top + fade | Expandable sections |
+| `subtle` | Fade only | Small elements |
+
+The `axStaggeredAppearance(index:isVisible:)` modifier creates a cascading entrance effect where cards appear sequentially with a 60ms delay between each. Respects Reduce Motion.
+
 ## Reusable Components
 
 ### `GlassCard`

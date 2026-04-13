@@ -21,8 +21,8 @@ The app currently provides a **testbed shell** for exercising the screenshot QA 
 
 ```
 AXIOMMobile/
-├── AXIOMMobileApp.swift            App entry point
-├── ContentView.swift               Root view (routes to TestbedView)
+├── AXIOMMobileApp.swift            App entry point (TipKit configured)
+├── ContentView.swift               Root view (launch screen → TestbedView)
 ├── DesignSystem/                   Semantic design tokens + reusable components
 │   ├── AXColor.swift               Adaptive color roles (accent, background, glass, status)
 │   ├── AXSpacing.swift             4-pt grid spacing scale
@@ -30,6 +30,9 @@ AXIOMMobile/
 │   ├── AXTypography.swift          Semantic font roles (Dynamic Type)
 │   ├── AXMotion.swift              Animation presets (Reduce Motion aware)
 │   ├── AXElevation.swift           Shadow/depth tokens
+│   ├── AXHaptics.swift             Haptic feedback tokens (SensoryFeedback mapping)
+│   ├── AXLayout.swift              Responsive layout tokens (iPad adaptation)
+│   ├── AXTransition.swift          Transition presets + staggered entrance modifier
 │   └── Components/
 │       ├── GlassCard.swift         Glass-material card container (3 hierarchy levels)
 │       ├── AXButtonStyle.swift     Primary, secondary, compact button styles
@@ -49,24 +52,47 @@ AXIOMMobile/
 │   ├── TinyMultimodal.mlpackage    Exported Core ML model (96KB, 24 classes)
 │   └── tiny_multimodal_v0_labels.json  Label vocabulary (idx → answer mapping)
 └── Features/
+    ├── Onboarding/
+    │   ├── AXTips.swift            TipKit tips (research context, screenshot, benchmark, CoreML)
+    │   └── LaunchScreen.swift      Branded launch screen + programmatic AppIconView
     └── Testbed/
-        ├── TestbedView.swift       Main testbed screen (gradient background, design-system CTA)
+        ├── TestbedView.swift       Main testbed screen (staggered entrance, haptics, tips)
         ├── TestbedViewModel.swift  @Observable view model (routes real vs placeholder)
         └── Views/
             ├── ScreenshotSection.swift     Hero card with empty-state and image preview
             ├── QuestionInputSection.swift  Glass-enclosed text field
-            ├── ModelPickerSection.swift    Model picker with status badge
-            ├── AnswerCard.swift            Elevated hero result card with latency badge
+            ├── ModelPickerSection.swift    Model picker with status badge + CoreML tip
+            ├── AnswerCard.swift            Elevated hero result card with entrance animation
             ├── DebugMetricsCard.swift      Collapsible subdued metrics card
-            ├── BenchmarkConfigSection.swift Compact benchmark toggle
-            └── BenchmarkSummaryCard.swift  Metric tiles with export actions
+            ├── BenchmarkConfigSection.swift Compact benchmark toggle + benchmark tip
+            └── BenchmarkSummaryCard.swift  Metric tiles with export actions + haptics
 ```
 
 ### Design System
 
-The app includes a design-system layer (`DesignSystem/`) that provides semantic tokens for color, spacing, shape, typography, motion, and elevation. All feature views consume these tokens — no magic numbers or raw colors in view code.
+The app includes a design-system layer (`DesignSystem/`) that provides semantic tokens for color, spacing, shape, typography, motion, elevation, haptics, layout, and transitions. All feature views consume these tokens — no magic numbers or raw colors in view code.
+
+Key additions in the v1 pass:
+- **AXHaptics** — maps logical events (inference complete, export, clear) to `SensoryFeedback` types
+- **AXLayout** — responsive container modifier for iPad/larger displays (`axResponsiveContainer()`)
+- **AXTransition** — card entrance, result appearance, and staggered cascade presets (Reduce Motion aware)
+- **Light mode polish** — increased contrast ratios for glass fills, strokes, tertiary text, and accent colors
 
 See `docs/DESIGN_SYSTEM.md` for full documentation of token categories, component usage rules, and accessibility behavior.
+
+### Onboarding (TipKit)
+
+The app uses Apple TipKit for contextual first-run tips:
+- **Research Context** — explains AXIOM on first launch
+- **Screenshot Import** — shown until the user imports their first screenshot
+- **Benchmark Mode** — appears after 3+ single-run inferences
+- **Core ML Model** — shown when the user selects a placeholder model
+
+Tips respect system tip display preferences and are shown at most once.
+
+### Launch Screen
+
+A branded launch screen displays the AXIOM icon and tagline for ~1.2 seconds on app start, then crossfades to the main testbed view. The `AppIconView` component renders the icon programmatically for use in both the launch screen and as a preview — the actual app icon assets are exported via `app/scripts/export_app_icon.swift`.
 
 ### Real Core ML inference
 
