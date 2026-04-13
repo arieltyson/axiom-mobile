@@ -184,8 +184,19 @@ class TinyMultimodalBaseline(ReasoningModel):
         *,
         val_rows: Sequence[dict[str, Any]] | None = None,
         seed: int = 0,
+        num_epochs: int = 20,
+        class_weighted: bool = False,
     ) -> dict[str, Any]:
-        """Train the tiny multimodal model on labeled screenshot-QA data."""
+        """Train the tiny multimodal model on labeled screenshot-QA data.
+
+        Args:
+            train_rows: Training examples with 'image_filename', 'question', 'answer'.
+            val_rows: Optional validation rows (unused during training, logged only).
+            seed: Random seed for reproducibility.
+            num_epochs: Number of training epochs (default: 20).
+            class_weighted: If True, use inverse-frequency class weights in the
+                loss function to mitigate answer-distribution imbalance.
+        """
         torch.manual_seed(seed)
 
         # Build label vocabulary from training data
@@ -203,11 +214,22 @@ class TinyMultimodalBaseline(ReasoningModel):
         # Prepare training data
         images, char_ids, labels = self._prepare_batch(train_rows)
 
-        # Simple training loop — SGD, cross-entropy, fixed epochs
+        # Simple training loop — SGD, cross-entropy, configurable epochs
         optimizer = torch.optim.SGD(self._net.parameters(), lr=0.01, momentum=0.9)
-        criterion = nn.CrossEntropyLoss()
 
-        num_epochs = 20
+        if class_weighted:
+            # Inverse-frequency weights capped at 10× to avoid extreme gradients
+            # from singleton classes.
+            class_counts = torch.zeros(num_classes)
+            for lbl in labels:
+                class_counts[lbl] += 1
+            raw_weights = 1.0 / class_counts.clamp(min=1)
+            raw_weights = raw_weights / raw_weights.min()  # normalize so min weight = 1
+            raw_weights = raw_weights.clamp(max=10.0)
+            criterion = nn.CrossEntropyLoss(weight=raw_weights)
+        else:
+            criterion = nn.CrossEntropyLoss()
+
         batch_size = min(16, len(train_rows))
         n = len(train_rows)
 
@@ -257,6 +279,7 @@ class TinyMultimodalBaseline(ReasoningModel):
             "num_epochs": num_epochs,
             "batch_size": batch_size,
             "learning_rate": 0.01,
+            "class_weighted": class_weighted,
             "final_loss": epoch_losses[-1] if epoch_losses else 0.0,
             "train_accuracy": round(train_acc, 4),
             "parameter_count": param_count,

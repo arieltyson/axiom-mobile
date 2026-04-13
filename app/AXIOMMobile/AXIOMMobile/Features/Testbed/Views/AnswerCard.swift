@@ -105,11 +105,7 @@ struct AnswerCard: View {
                     )
             }
 
-            Text(
-                "This model's 24-class vocabulary does not cover the asked question. "
-                + "Try questions like \u{201c}Is Bluetooth on or off?\u{201d} or "
-                + "\u{201c}What battery percentage is shown?\u{201d}"
-            )
+            Text(lowConfidenceExplanation)
             .font(AXFont.caption)
             .foregroundStyle(AXColor.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -133,14 +129,26 @@ struct AnswerCard: View {
                 variant: .warning,
                 icon: "info.circle"
             )
-        } else if result.modelID == "tiny_multimodal_v0", !result.isLowConfidence {
+        } else if result.modelID.hasPrefix("tiny_multimodal_v"), !result.isLowConfidence {
+            let meta = ModelMetadata.forModel(result.modelID)
             Text(
-                "This model classifies mobile app screenshots into a fixed set of 24 answer categories. Results on non-screenshot images or open-ended questions may not be meaningful."
+                "This model classifies mobile app screenshots into a fixed set of \(meta.numClasses) answer categories. Results on non-screenshot images or open-ended questions may not be meaningful."
             )
             .font(AXFont.caption)
             .foregroundStyle(AXColor.textTertiary)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    // MARK: - Dynamic Copy
+
+    /// Explanation text when confidence is below threshold, driven by model metadata.
+    private var lowConfidenceExplanation: String {
+        let meta = ModelMetadata.forModel(result.modelID)
+        let classCount = meta.numClasses > 0 ? meta.numClasses : result.numClasses ?? 0
+        return "This model\u{2019}s \(classCount)-class vocabulary does not cover the asked question. "
+            + "Try questions like \u{201c}Is Bluetooth on or off?\u{201d} or "
+            + "\u{201c}What battery percentage is shown?\u{201d}"
     }
 
     // MARK: - Badges

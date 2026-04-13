@@ -93,17 +93,34 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Output directory for result artifacts.",
     )
+    parser.add_argument(
+        "--output-suffix",
+        default=None,
+        help="Suffix appended to the default output directory name (e.g. '_v2').",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=20,
+        help="Number of training epochs (default: 20).",
+    )
+    parser.add_argument(
+        "--class-weighted",
+        action="store_true",
+        help="Use inverse-frequency class-weighted cross-entropy loss.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
-    output_dir = (
-        Path(args.output_dir).resolve()
-        if args.output_dir is not None
-        else _default_output_dir(repo_root, args.model_id, args.seed)
-    )
+    if args.output_dir is not None:
+        output_dir = Path(args.output_dir).resolve()
+    else:
+        default = _default_output_dir(repo_root, args.model_id, args.seed)
+        suffix = args.output_suffix or ""
+        output_dir = default.parent / (default.name + suffix)
 
     # Resolve image root
     image_root = resolve_image_root(args.image_root)
@@ -156,11 +173,13 @@ def main() -> int:
     spec = resolve_model_spec(args.model_id)
     model = instantiate_model(args.model_id, image_root=image_root)
 
-    print(f"\nTraining {args.model_id}...")
+    print(f"\nTraining {args.model_id} (epochs={args.epochs}, class_weighted={args.class_weighted})...")
     training_summary = model.train(
         splits["pool"],
         val_rows=splits["val"],
         seed=args.seed,
+        num_epochs=args.epochs,
+        class_weighted=args.class_weighted,
     )
     print(f"Training complete. Loss={training_summary['final_loss']:.4f}, "
           f"Train acc={training_summary['train_accuracy']:.4f}, "

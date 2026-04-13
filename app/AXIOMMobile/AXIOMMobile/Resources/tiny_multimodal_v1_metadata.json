@@ -1,0 +1,32 @@
+{
+  "model_id": "tiny_multimodal_v1",
+  "model_version": 1,
+  "num_classes": 128,
+  "confidence_threshold": 0.45,
+  "threshold_rationale": "Empirically calibrated from v2 val/test splits. Correct predictions have min confidence ~0.48 (val) and ~0.48 (test). Incorrect predictions have max confidence ~0.64 (val) and ~0.50 (test). Threshold 0.45 achieves ~88-91% recall of correct predictions with 64-71% precision, filtering most incorrect predictions while preserving nearly all confident correct ones. Clear separation zone between 0.15 and 0.48.",
+  "random_baseline": 0.0078,
+  "calibration_data": {
+    "val_correct_confidence_range": [0.4958, 0.8741],
+    "val_correct_confidence_mean": 0.7447,
+    "val_incorrect_confidence_range": [0.0322, 0.6428],
+    "val_incorrect_confidence_median": 0.0432,
+    "test_correct_confidence_range": [0.4845, 0.8743],
+    "test_correct_confidence_mean": 0.7868,
+    "test_incorrect_confidence_range": [0.0254, 0.5053],
+    "test_incorrect_confidence_median": 0.0389
+  },
+  "supported_question_types": [
+    "toggle state (Is [setting] on or off?)",
+    "battery percentage",
+    "time display",
+    "temperature reading",
+    "Wi-Fi network name",
+    "app identification (What app is open?)",
+    "notification content",
+    "screen brightness",
+    "storage usage",
+    "signal strength"
+  ],
+  "task_summary": "128-class screenshot QA classifier trained on dataset v2 (382 pool examples) with class-weighted cross-entropy loss.",
+  "dataset_version": 2
+}

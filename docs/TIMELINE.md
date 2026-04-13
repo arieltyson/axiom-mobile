@@ -97,8 +97,9 @@ Deliverable status: `[~]` In progress (KG-guided blocked on Phase 1 dependency; 
 - `[x]` Private screenshot-root bootstrap: `ml/scripts/locate_screenshot_root.py` discovers `screenshots_v1/` on macOS; `docs/PRIVATE_DATA_SETUP.md` documents setup.
 - `[x]` `export_coreml()` method implemented on `TinyMultimodalBaseline` (in `ml/src/axiom/models/tiny_multimodal.py`).
 - `[x]` `coremltools>=8.0` added as `[export]` optional dependency in `ml/pyproject.toml`.
-- `[x]` App integration for `.mlpackage` loading: `CoreMLInferenceService` loads bundled `TinyMultimodal.mlpackage` (96KB, 24 classes, trained on real 52-screenshot frozen dataset), preprocesses image+text, runs Core ML prediction, returns real `InferenceResult` with `isPlaceholder=false`. `TestbedViewModel` routes to real service when `isCoreMLReady` is true.
-- `[x]` Model catalog updated: `tiny_multimodal_v0` is the first entry with `isCoreMLReady: true`, `backend: "coreml"`.
+- `[x]` App integration for `.mlpackage` loading: `CoreMLInferenceService` loads bundled `.mlpackage` and label vocab, preprocesses image+text, runs Core ML prediction, returns real `InferenceResult` with `isPlaceholder=false`. `TestbedViewModel` routes to real service when `isCoreMLReady` is true.
+- `[x]` Model catalog updated: `tiny_multimodal_v1` is the default entry with `isCoreMLReady: true`; v0 remains available.
+- `[x]` Model metadata sidecar system: per-model JSON files (`{model_id}_metadata.json`) bundle calibrated confidence threshold, class count, supported question types, and task summary. `InferenceResult`, `AnswerCard`, and `QuestionInputSection` consume metadata dynamically — no hardcoded class counts or thresholds.
 - `[x]` Benchmark pipeline distinguishes real vs placeholder inference via `isPlaceholder` field in CSV and `_meta.json`.
 
 Deliverable status: `[x]` Complete (export pipeline, accuracy gate, and app integration all done; quantization deferred).
@@ -173,6 +174,9 @@ Deliverable status: `[x]` Complete.
 - `[x]` Phase 6: Final presentation / slide deck — `presentation/SLIDE_DECK_v1.md`, speaker notes, generated assets, paper v2.
 - `[x]` Exact-answer dataset scaling pipeline: scenario generator (v0.3.0, 50 variants), status bar variants, visually-verified promotion, 400 auto-exact entries promoted in batch `exact_v3_batch001`.
 - `[x]` Dataset v2 freeze with deterministic stratified splits and SHA256 fingerprints. v1 manifests archived.
-- `[ ]` Retrain model with expanded answer/task coverage (new label vocabulary needed: 24 → ~134 unique answers).
+- `[x]` Retrain model on dataset v2: `tiny_multimodal_v1` with 128 normalized answer classes, class-weighted CE loss, 40 epochs. Pool EM=30.9%, val EM=26.7%, test EM=27.5% (v0 was 16.2%/0%/10%).
+- `[x]` Core ML export of v1: accuracy gate PASSED (0% drop on both val and test). 128-class `.mlpackage`.
+- `[x]` Empirical confidence threshold calibration: correct predictions min confidence ~0.48, incorrect predictions mostly <0.15. Calibrated threshold: 0.45 (stored in model metadata sidecar, not hardcoded).
+- `[x]` App integration of v1: `TinyMultimodalV1.mlpackage` + `tiny_multimodal_v1_labels.json` + `tiny_multimodal_v1_metadata.json` bundled. `CoreMLInferenceService` routes by model ID. `InferenceResult` reads threshold from metadata. `AnswerCard` and `QuestionInputSection` use `ModelMetadata` for dynamic copy. v1 is default model; v0 remains available.
 - `[ ]` Extend XCUITest for Settings sub-pages (General, Accessibility, etc.) and Maps navigation.
 - `[ ]` Add dual-annotator agreement workflow (Cohen's kappa >= 0.75).
